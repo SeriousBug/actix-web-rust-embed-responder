@@ -7,12 +7,18 @@ pub struct EmbeddedForWebFileResponse {
     embedded_file: rust_embed_for_web::EmbeddedFile,
 }
 
+impl From<rust_embed_for_web::EmbeddedFile> for EmbeddedForWebFileResponse {
+    fn from(embedded_file: rust_embed_for_web::EmbeddedFile) -> Self {
+        EmbeddedForWebFileResponse { embedded_file }
+    }
+}
+
 impl Responder for EmbeddedForWebFileResponse {
     type Body = BoxBody;
 
     fn respond_to(self, req: &HttpRequest) -> HttpResponse<Self::Body> {
         // This responder can't respond to anything other than GET and HEAD requests.
-        if req.method() != Method::GET || req.method() != Method::HEAD {
+        if req.method() != Method::GET && req.method() != Method::HEAD {
             return HttpResponse::NotImplemented().finish();
         }
 
