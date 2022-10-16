@@ -1,4 +1,4 @@
-use actix_web::{get, web, App, Either, HttpResponse, HttpServer};
+use actix_web::{get, web, App, Either, HttpRequest, HttpResponse, HttpServer};
 use actix_web_rust_embed_responder::EmbeddedFileResponse;
 use rust_embed::RustEmbed;
 
@@ -7,8 +7,25 @@ use rust_embed::RustEmbed;
 struct Embed;
 
 #[get("/{path:.*}")]
-async fn greet(params: web::Path<String>) -> Either<EmbeddedFileResponse, HttpResponse> {
+async fn greet(
+    req: HttpRequest,
+    params: web::Path<String>,
+) -> Either<EmbeddedFileResponse, HttpResponse> {
     println!("{:?}", params.as_str());
+
+    if let Some(if_modified_since) = req
+        .headers()
+        .get("If-Unmodified-Since")
+        .and_then(|v| v.to_str().ok())
+    {
+        println!("header: {:?}", if_modified_since);
+        if let Some(if_modified_since) =
+            chrono::DateTime::parse_from_rfc2822(if_modified_since).ok()
+        {
+            println!("date: {:?}", if_modified_since.to_rfc2822());
+        }
+    }
+
     let path = if params.is_empty() {
         "index.html"
     } else {

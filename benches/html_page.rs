@@ -1,39 +1,11 @@
 use std::time::Duration;
 
-use actix_web::{dev::ServiceResponse, get, test, App};
-use actix_web_rust_embed_responder::{EmbeddedFileResponse, EmbeddedForWebFileResponse};
+use actix_web::{dev::ServiceResponse, test};
 use criterion::{criterion_group, criterion_main, Criterion};
-use tokio::runtime::{self, Runtime};
+use tokio::runtime;
 
-#[derive(rust_embed::RustEmbed)]
-#[folder = "examples/assets/"]
-struct EmbedRE;
-
-#[derive(rust_embed_for_web::RustEmbed)]
-#[folder = "examples/assets/"]
-struct EmbedREFW;
-
-#[get("/re")]
-async fn re_handler() -> EmbeddedFileResponse {
-    EmbedRE::get("index.html").unwrap().into()
-}
-
-#[get("/refw")]
-async fn refw_handler() -> EmbeddedForWebFileResponse {
-    EmbedREFW::get("index.html").unwrap().into()
-}
-
-fn prep_service(
-    runtime: &Runtime,
-) -> impl actix_web::dev::Service<
-    actix_http::Request,
-    Response = ServiceResponse,
-    Error = actix_web::Error,
-> {
-    runtime.block_on(actix_web::test::init_service(
-        App::new().service(refw_handler).service(re_handler),
-    ))
-}
+mod common;
+use common::{prep_service, SECS_PER_BENCH};
 
 async fn test_re(
     app: impl actix_web::dev::Service<
@@ -60,8 +32,8 @@ async fn test_refw(
 }
 
 fn criterion_benchmark(c: &mut Criterion) {
-    let mut group = c.benchmark_group("Basic homepages");
-    group.measurement_time(Duration::from_secs(30));
+    let mut group = c.benchmark_group("html page, no compression");
+    group.measurement_time(Duration::from_secs(SECS_PER_BENCH));
 
     let runtime = runtime::Builder::new_current_thread().build().unwrap();
     let app = prep_service(&runtime);

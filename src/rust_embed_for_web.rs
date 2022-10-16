@@ -45,18 +45,18 @@ impl Responder for EmbeddedForWebFileResponse {
             }
         }
 
-        // Handle If-Modified-Since requests. As a fallback to ETag, the client
+        // Handle If-Unmodified-Since requests. As a fallback to ETag, the client
         // can also check if a file has been modified using the last modified
         // timestamp of the file.
-        if let Some(if_modified_since) = req
-            .headers()
-            .get("If-Modified-Since")
-            .and_then(|v| v.to_str().ok())
-            .and_then(|v| chrono::DateTime::parse_from_rfc2822(v).ok())
-        {
-            if let Some(last_modified_timestamp) = last_modified_timestamp {
+        if let Some(last_modified_timestamp) = last_modified_timestamp {
+            if let Some(if_unmodified_since) = req
+                .headers()
+                .get("If-Unmodified-Since")
+                .and_then(|v| v.to_str().ok())
+                .and_then(|v| chrono::DateTime::parse_from_rfc2822(v).ok())
+            {
                 // It's been modified since then
-                if last_modified_timestamp > if_modified_since.timestamp() {
+                if last_modified_timestamp > if_unmodified_since.timestamp() {
                     return respond(&self, req, &etag, last_modified);
                 } else {
                     return HttpResponse::NotModified().finish();

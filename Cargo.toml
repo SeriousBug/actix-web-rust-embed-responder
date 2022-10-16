@@ -26,6 +26,10 @@ criterion = { version = "0.4", features = ["async_tokio"] }
 tokio = { version = "1.21", features = ["rt"] }
 actix-http = "3.2"
 
+#
+# Example programs
+#
+
 [[example]]
 name = "rust_embed"
 path = "examples/rust_embed.rs"
@@ -36,6 +40,26 @@ name = "rust_embed_for_web"
 path = "examples/rust_embed_for_web.rs"
 required-features = ["support-rust-embed-for-web"]
 
+#
+# Benchmarks
+#
+
 [[bench]]
-name = "basic_page"
+# Benchmark for getting a single HTML page.
+name = "html_page"
+harness = false
+
+[[bench]]
+# Benchmark for getting a single HTML page, with compression.
+name = "html_page_with_compression"
+harness = false
+
+[[bench]]
+# Benchmark for cached responses only.
+name = "cached"
+harness = false
+
+[[bench]]
+# Benchmark for a mixed of cached and non-cached responses, some with and some without compression.
+name = "mix"
 harness = false
