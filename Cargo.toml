@@ -50,6 +50,11 @@ name = "html_page"
 harness = false
 
 [[bench]]
+# Benchmark for getting an image file, a much larger file than the HTML page benchmark.
+name = "image"
+harness = false
+
+[[bench]]
 # Benchmark for getting a single HTML page, with compression.
 name = "html_page_with_compression"
 harness = false

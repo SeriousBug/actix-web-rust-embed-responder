@@ -14,10 +14,7 @@ async fn test_re(
         Error = actix_web::Error,
     >,
 ) {
-    let req = test::TestRequest::get()
-        .uri("/re")
-        .append_header(("Accept-Encoding", "gzip"))
-        .to_request();
+    let req = test::TestRequest::get().uri("/re/image").to_request();
     let resp = test::call_and_read_body(&app, req).await;
     assert!(!resp.is_empty())
 }
@@ -29,16 +26,13 @@ async fn test_refw(
         Error = actix_web::Error,
     >,
 ) {
-    let req = test::TestRequest::get()
-        .uri("/refw")
-        .append_header(("Accept-Encoding", "gzip"))
-        .to_request();
+    let req = test::TestRequest::get().uri("/refw/image").to_request();
     let resp = test::call_and_read_body(&app, req).await;
     assert!(!resp.is_empty())
 }
 
 fn criterion_benchmark(c: &mut Criterion) {
-    let mut group = c.benchmark_group("get html page, with compression");
+    let mut group = c.benchmark_group("image file");
     group.measurement_time(Duration::from_secs(SECS_PER_BENCH));
 
     let runtime = runtime::Builder::new_current_thread().build().unwrap();

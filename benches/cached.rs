@@ -51,6 +51,8 @@ fn criterion_benchmark(c: &mut Criterion) {
     group.bench_with_input("rust_embed_for_web", &app, |b, app| {
         b.to_async(&runtime).iter(|| test_refw(app))
     });
+
+    group.finish();
 }
 
 criterion_group!(benches, criterion_benchmark);
