@@ -4,10 +4,7 @@ use actix_web::{body::BoxBody, http::Method, HttpRequest, HttpResponse, Responde
 use chrono::TimeZone;
 use flate2::Compression;
 
-use crate::{
-    helper::accepts_gzip,
-    parse::{parse_accept_encoding_value, parse_if_none_match_value},
-};
+use crate::{helper::accepts_gzip, parse::parse_if_none_match_value};
 
 pub struct EmbeddedFileResponse {
     embedded_file: rust_embed::EmbeddedFile,
