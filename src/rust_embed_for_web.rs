@@ -27,8 +27,6 @@ impl Responder for EmbeddedForWebFileResponse {
         let last_modified = self.embedded_file.metadata.last_modified();
         let last_modified_timestamp = self.embedded_file.metadata.last_modified_timestamp();
 
-        let accepts_gzip = accepts_gzip(req);
-
         // Handle If-None-Match requests. If the client has the file cached
         // already, it can send back the ETag to ask for the file only if it has
         // changed.
@@ -43,7 +41,7 @@ impl Responder for EmbeddedForWebFileResponse {
             if req_etags.contains(&etag) {
                 return HttpResponse::NotModified().finish();
             } else {
-                return respond(&self, &etag, accepts_gzip, last_modified);
+                return respond(&self, req, &etag, last_modified);
             }
         }
 
@@ -59,7 +57,7 @@ impl Responder for EmbeddedForWebFileResponse {
             if let Some(last_modified_timestamp) = last_modified_timestamp {
                 // It's been modified since then
                 if last_modified_timestamp > if_modified_since.timestamp() {
-                    return respond(&self, &etag, accepts_gzip, last_modified);
+                    return respond(&self, req, &etag, last_modified);
                 } else {
                     return HttpResponse::NotModified().finish();
                 }
@@ -68,14 +66,14 @@ impl Responder for EmbeddedForWebFileResponse {
 
         // Otherwise, the client doesn't have the file cached and we do need to
         // send a response.
-        respond(&self, etag, accepts_gzip, last_modified)
+        respond(&self, req, etag, last_modified)
     }
 }
 
 fn respond(
     file: &EmbeddedForWebFileResponse,
+    req: &HttpRequest,
     etag: &str,
-    accepts_gzip: bool,
     last_modified: Option<&str>,
 ) -> HttpResponse {
     let mut resp = HttpResponse::Ok();
@@ -87,7 +85,7 @@ fn respond(
 
     // We respond with gzip if the client accepts it, and if gzipping the file
     // actually makes it smaller (otherwise the data_gzip would be None)
-    if accepts_gzip {
+    if accepts_gzip(req) {
         if let Some(data_gzip) = file.embedded_file.data_gzip {
             resp.append_header(("Content-Encoding", "gzip"));
             return resp.body(data_gzip);

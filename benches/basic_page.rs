@@ -3,7 +3,6 @@ use std::time::Duration;
 use actix_web::{dev::ServiceResponse, get, test, App};
 use actix_web_rust_embed_responder::{EmbeddedFileResponse, EmbeddedForWebFileResponse};
 use criterion::{criterion_group, criterion_main, Criterion};
-use lazy_static::lazy_static;
 use tokio::runtime::{self, Runtime};
 
 #[derive(rust_embed::RustEmbed)]
@@ -14,12 +13,12 @@ struct EmbedRE;
 #[folder = "examples/assets/"]
 struct EmbedREFW;
 
-#[get("/")]
+#[get("/re")]
 async fn re_handler() -> EmbeddedFileResponse {
     EmbedRE::get("index.html").unwrap().into()
 }
 
-#[get("/")]
+#[get("/refw")]
 async fn refw_handler() -> EmbeddedForWebFileResponse {
     EmbedREFW::get("index.html").unwrap().into()
 }
@@ -32,7 +31,7 @@ fn prep_service(
     Error = actix_web::Error,
 > {
     runtime.block_on(actix_web::test::init_service(
-        App::new().service(refw_handler),
+        App::new().service(refw_handler).service(re_handler),
     ))
 }
 
@@ -43,7 +42,7 @@ async fn test_re(
         Error = actix_web::Error,
     >,
 ) {
-    let req = test::TestRequest::get().to_request();
+    let req = test::TestRequest::get().uri("/re").to_request();
     let resp = test::call_and_read_body(&app, req).await;
     assert!(resp.starts_with("<!DOCTYPE html>".as_bytes()))
 }
@@ -55,7 +54,7 @@ async fn test_refw(
         Error = actix_web::Error,
     >,
 ) {
-    let req = test::TestRequest::get().to_request();
+    let req = test::TestRequest::get().uri("/refw").to_request();
     let resp = test::call_and_read_body(&app, req).await;
     assert!(resp.starts_with("<!DOCTYPE html>".as_bytes()))
 }
