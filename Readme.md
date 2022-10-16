@@ -17,9 +17,4 @@ This crate also supports an alternative rust-embed fork [rust-embed-for-web](htt
 
 This rust-embed fork pre-computes `ETag` and `Last-Modified` headers, and
 pre-compresses the files for compressed responses. This comes at the cost of a
-larger executable size, but should improve performance significantly. If you
-want to use this fork instead, you can do so like this:
-
-```toml
-actix-web-rust-embed-responder = { version = "...", default-features = false, features = [ "support-rust-embed-for-web" ] }
-```
+larger executable size, but improves performance massively.
