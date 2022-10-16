@@ -3,8 +3,6 @@ name = "actix-web-rust-embed-responder"
 version = "0.1.0"
 edition = "2021"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-
 [features]
 default = ["support-rust-embed", "support-rust-embed-for-web"]
 support-rust-embed = ["rust-embed", "flate2", "base64", "chrono"]
@@ -22,3 +20,22 @@ base64 = { version = "0.13", optional = true }    # ETag
 chrono = { version = "0.4", optional = true }     # Last-Modified
 # rust-embed-for-web only
 rust-embed-for-web = { version = "8.0", optional = true }
+
+[dev-dependencies]
+criterion = { version = "0.4", features = ["async_tokio"] }
+tokio = { version = "1.21", features = ["rt"] }
+actix-http = "3.2"
+
+[[example]]
+name = "rust_embed"
+path = "examples/rust_embed.rs"
+required-features = ["support-rust-embed"]
+
+[[example]]
+name = "rust_embed_for_web"
+path = "examples/rust_embed_for_web.rs"
+required-features = ["support-rust-embed-for-web"]
+
+[[bench]]
+name = "basic_page"
+harness = false
