@@ -1,7 +1,5 @@
-use actix_web::{body::BoxBody, http::Method, HttpRequest, HttpResponse, Responder};
-use chrono::DateTime;
-
 use crate::{helper::accepts_gzip, parse::parse_if_none_match_value};
+use actix_web::{body::BoxBody, http::Method, HttpRequest, HttpResponse, Responder};
 
 pub struct EmbeddedForWebFileResponse {
     embedded_file: rust_embed_for_web::EmbeddedFile,
@@ -26,10 +24,8 @@ impl Responder for EmbeddedForWebFileResponse {
         // base64. We surround it with quotes as per the spec.
         let etag = self.embedded_file.metadata.etag();
 
-        let last_modified = self.embedded_file.metadata.last_modified().unwrap();
-        let last_modified_date = DateTime::parse_from_rfc2822(last_modified)
-            // TODO
-            .unwrap();
+        let last_modified = self.embedded_file.metadata.last_modified();
+        let last_modified_timestamp = self.embedded_file.metadata.last_modified_timestamp();
 
         let accepts_gzip = accepts_gzip(req);
 
@@ -47,7 +43,7 @@ impl Responder for EmbeddedForWebFileResponse {
             if req_etags.contains(&etag) {
                 return HttpResponse::NotModified().finish();
             } else {
-                return respond(&self, &etag, accepts_gzip, Some(&last_modified));
+                return respond(&self, &etag, accepts_gzip, last_modified);
             }
         }
 
@@ -60,17 +56,19 @@ impl Responder for EmbeddedForWebFileResponse {
             .and_then(|v| v.to_str().ok())
             .and_then(|v| chrono::DateTime::parse_from_rfc2822(v).ok())
         {
-            // It's been modified since then
-            if last_modified_date > if_modified_since {
-                return respond(&self, &etag, accepts_gzip, Some(&last_modified));
-            } else {
-                return HttpResponse::NotModified().finish();
+            if let Some(last_modified_timestamp) = last_modified_timestamp {
+                // It's been modified since then
+                if last_modified_timestamp > if_modified_since.timestamp() {
+                    return respond(&self, &etag, accepts_gzip, last_modified);
+                } else {
+                    return HttpResponse::NotModified().finish();
+                }
             }
         }
 
         // Otherwise, the client doesn't have the file cached and we do need to
         // send a response.
-        respond(&self, etag, accepts_gzip, Some(&last_modified))
+        respond(&self, etag, accepts_gzip, last_modified)
     }
 }
 
