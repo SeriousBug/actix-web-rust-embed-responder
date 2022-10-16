@@ -15,7 +15,6 @@ impl Responder for EmbeddedForWebFileResponse {
         if req.method() != Method::GET || req.method() != Method::HEAD {
             return HttpResponse::NotImplemented().finish();
         }
-        // TODO: Do I need to implement OPTION here?
 
         // For the ETag we are using the sha256 hash of the file, encoded with
         // base64. We surround it with quotes as per the spec.
@@ -34,8 +33,11 @@ impl Responder for EmbeddedForWebFileResponse {
         //
         // We first check If-None-Match because the spec specifies that it gets
         // priority over If-Modified-Since.
-        if let Some(if_none_match) = req.headers().get("If-None-Match") {
-            let req_etags = parse_if_none_match_value(if_none_match);
+        if let Some(req_etags) = req
+            .headers()
+            .get("If-None-Match")
+            .and_then(parse_if_none_match_value)
+        {
             if req_etags.contains(&etag) {
                 return HttpResponse::NotModified().finish();
             } else {
@@ -50,16 +52,13 @@ impl Responder for EmbeddedForWebFileResponse {
             .headers()
             .get("If-Modified-Since")
             .and_then(|v| v.to_str().ok())
+            .and_then(|v| chrono::DateTime::parse_from_rfc2822(v).ok())
         {
-            if let Some(if_modified_since) =
-                chrono::DateTime::parse_from_rfc2822(if_modified_since).ok()
-            {
-                // It's been modified since then
-                if last_modified_date > if_modified_since {
-                    return respond(&self, &etag, accepts_gzip, Some(&last_modified));
-                } else {
-                    return HttpResponse::NotModified().finish();
-                }
+            // It's been modified since then
+            if last_modified_date > if_modified_since {
+                return respond(&self, &etag, accepts_gzip, Some(&last_modified));
+            } else {
+                return HttpResponse::NotModified().finish();
             }
         }
 

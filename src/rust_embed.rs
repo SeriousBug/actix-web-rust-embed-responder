@@ -4,7 +4,10 @@ use actix_web::{body::BoxBody, http::Method, HttpRequest, HttpResponse, Responde
 use chrono::TimeZone;
 use flate2::Compression;
 
-use crate::parse::{parse_accept_encoding_value, parse_if_none_match_value};
+use crate::{
+    helper::accepts_gzip,
+    parse::{parse_accept_encoding_value, parse_if_none_match_value},
+};
 
 pub struct EmbeddedFileResponse {
     embedded_file: rust_embed::EmbeddedFile,
@@ -45,8 +48,11 @@ impl Responder for EmbeddedFileResponse {
         // Handle If-None-Match requests. If the client has the file cached
         // already, it can send back the ETag to ask for the file only if it has
         // changed.
-        if let Some(if_none_match) = req.headers().get("If-None-Match") {
-            let req_etags = parse_if_none_match_value(if_none_match);
+        if let Some(req_etags) = req
+            .headers()
+            .get("If-None-Match")
+            .and_then(parse_if_none_match_value)
+        {
             if req_etags.contains(&etag.as_str()) {
                 return HttpResponse::NotModified().finish();
             } else {
@@ -100,17 +106,10 @@ fn respond(
     // caching could break.
     resp.append_header(("Cache-Control", "no-cache"));
 
-    let accepts_gzip = req
-        .headers()
-        .get("Accept-Encoding")
-        .map(parse_accept_encoding_value)
-        .map(|encodings| encodings.contains(&"gzip"))
-        .unwrap_or(false);
-
     let file_data = file.embedded_file.data.clone().into_owned();
 
     // TODO: This about potentially limiting this to only sometimes. Or maybe use a builder pattern to let the user decide if they want compression.
-    if accepts_gzip {
+    if accepts_gzip(req) {
         let mut compressed: Vec<u8> = Vec::new();
         flate2::write::GzEncoder::new(&mut compressed, Compression::fast())
             .write_all(file_data.as_ref())
