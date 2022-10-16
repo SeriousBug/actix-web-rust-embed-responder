@@ -1,0 +1,24 @@
+[package]
+name = "actix-web-rust-embed-responder"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[features]
+default = ["support-rust-embed", "support-rust-embed-for-web"]
+support-rust-embed = ["rust-embed", "flate2", "base64", "chrono"]
+support-rust-embed-for-web = ["rust-embed-for-web"]
+
+[dependencies]
+actix-web = "4.2"
+futures-core = "0.3"
+lazy_static = "1.4"
+regex = "1.6"
+# rust-embed only
+rust-embed = { version = "6.4", optional = true }
+flate2 = { version = "1.0", optional = true }     # gzip compressed responses
+base64 = { version = "0.13", optional = true }    # ETag
+chrono = { version = "0.4", optional = true }     # Last-Modified
+# rust-embed-for-web only
+rust-embed-for-web = { version = "8.0", optional = true }

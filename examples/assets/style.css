@@ -1,0 +1,25 @@
+p, h1 {
+  max-width: 64rem;
+  margin: 0 auto 2rem auto;
+
+}
+
+h1 {
+  text-align: center;
+}
+
+.image-container {
+  margin: 0 auto 2rem auto;
+  width: 120rem;
+}
+
+img {
+  display: inline;
+  width: 30%;
+  max-height: 32rem;
+  object-fit: cover;
+}
+
+body {
+  background-color: #fff0e4;
+}
