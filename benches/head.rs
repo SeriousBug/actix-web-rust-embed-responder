@@ -1,5 +1,6 @@
 use std::time::Duration;
 
+use actix_http::Method;
 use actix_web::{dev::ServiceResponse, test};
 use criterion::{criterion_group, criterion_main, Criterion};
 use tokio::runtime;
@@ -14,12 +15,12 @@ async fn test_re(
         Error = actix_web::Error,
     >,
 ) {
-    let req = test::TestRequest::get()
+    let req = test::TestRequest::default()
+        .method(Method::HEAD)
         .uri("/re/")
-        .append_header(("Accept-Encoding", "gzip"))
         .to_request();
-    let resp = test::call_and_read_body(&app, req).await;
-    assert!(!resp.is_empty())
+    let resp = test::call_service(&app, req).await;
+    assert_eq!(resp.status(), 200)
 }
 
 async fn test_refw(
@@ -29,16 +30,16 @@ async fn test_refw(
         Error = actix_web::Error,
     >,
 ) {
-    let req = test::TestRequest::get()
+    let req = test::TestRequest::default()
+        .method(Method::HEAD)
         .uri("/refw/")
-        .append_header(("Accept-Encoding", "gzip"))
         .to_request();
-    let resp = test::call_and_read_body(&app, req).await;
-    assert!(!resp.is_empty())
+    let resp = test::call_service(&app, req).await;
+    assert_eq!(resp.status(), 200)
 }
 
 fn criterion_benchmark(c: &mut Criterion) {
-    let mut group = c.benchmark_group("get html page, with compression");
+    let mut group = c.benchmark_group("image file");
     group.measurement_time(Duration::from_secs(SECS_PER_BENCH));
 
     let runtime = runtime::Builder::new_current_thread().build().unwrap();

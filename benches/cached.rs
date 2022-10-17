@@ -16,7 +16,7 @@ async fn test_re(
 ) {
     let req = test::TestRequest::get()
         .append_header(("If-None-Match", ETAG_RE))
-        .uri("/re")
+        .uri("/re/")
         .to_request();
     let resp = test::call_service(&app, req).await;
     assert_eq!(resp.status(), 304);
@@ -30,7 +30,7 @@ async fn test_refw(
     >,
 ) {
     let req = test::TestRequest::get()
-        .uri("/refw")
+        .uri("/refw/")
         .append_header(("If-None-Match", ETAG_REFW))
         .to_request();
     let resp = test::call_service(&app, req).await;

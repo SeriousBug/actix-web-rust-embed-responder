@@ -1,21 +1,19 @@
-use actix_web::{get, web, App, HttpServer};
-use actix_web_rust_embed_responder::EmbeddedFileResponse;
-use rust_embed::RustEmbed;
+use actix_web::{route, web, App, HttpServer};
+use actix_web_rust_embed_responder::EmbedResponse;
+use rust_embed::{EmbeddedFile, RustEmbed};
 
 #[derive(RustEmbed)]
 #[folder = "examples/assets/"]
 struct Embed;
 
-#[get("/{path:.*}")]
-async fn greet(params: web::Path<String>) -> EmbeddedFileResponse {
-    let path = if params.is_empty() {
+#[route("/{path:.*}", method = "GET", method = "HEAD")]
+async fn greet(path: web::Path<String>) -> EmbedResponse<EmbeddedFile> {
+    let path = if path.is_empty() {
         "index.html"
     } else {
-        params.as_str()
+        path.as_str()
     };
-    let f = Embed::get(path);
-    let embed: EmbeddedFileResponse = f.into();
-    embed
+    Embed::get(path).into()
 }
 
 #[actix_web::main] // or #[tokio::main]

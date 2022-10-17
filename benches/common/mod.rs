@@ -1,5 +1,5 @@
-use actix_web::{dev::ServiceResponse, get, App};
-use actix_web_rust_embed_responder::{EmbeddedFileResponse, EmbeddedForWebFileResponse};
+use actix_web::{dev::ServiceResponse, route, web, App};
+use actix_web_rust_embed_responder::EmbedResponse;
 use tokio::runtime::Runtime;
 
 #[derive(rust_embed::RustEmbed)]
@@ -10,26 +10,24 @@ struct EmbedRE;
 #[folder = "examples/assets/"]
 struct EmbedREFW;
 
-#[get("/re")]
-async fn re_handler() -> EmbeddedFileResponse {
-    EmbedRE::get("index.html").unwrap().into()
+#[route("/re/{path:.*}", method = "GET", method = "HEAD")]
+async fn re_handler(path: web::Path<String>) -> EmbedResponse<rust_embed::EmbeddedFile> {
+    let path = if path.is_empty() {
+        "index.html"
+    } else {
+        path.as_str()
+    };
+    EmbedRE::get(path).into()
 }
 
-#[get("/refw")]
-async fn refw_handler() -> EmbeddedForWebFileResponse {
-    EmbedREFW::get("index.html").unwrap().into()
-}
-
-#[get("/re/image")]
-async fn re_image_handler() -> EmbeddedFileResponse {
-    EmbedRE::get("pexels-david-yu-10075042.jpg").unwrap().into()
-}
-
-#[get("/refw/image")]
-async fn refw_image_handler() -> EmbeddedForWebFileResponse {
-    EmbedREFW::get("pexels-david-yu-10075042.jpg")
-        .unwrap()
-        .into()
+#[route("/refw/{path:.*}", method = "GET", method = "HEAD")]
+async fn refw_handler(path: web::Path<String>) -> EmbedResponse<rust_embed_for_web::EmbeddedFile> {
+    let path = if path.is_empty() {
+        "index.html"
+    } else {
+        path.as_str()
+    };
+    EmbedREFW::get(path).into()
 }
 
 pub fn prep_service(
@@ -40,11 +38,7 @@ pub fn prep_service(
     Error = actix_web::Error,
 > {
     runtime.block_on(actix_web::test::init_service(
-        App::new()
-            .service(refw_handler)
-            .service(re_handler)
-            .service(re_image_handler)
-            .service(refw_image_handler),
+        App::new().service(refw_handler).service(re_handler),
     ))
 }
 
@@ -55,4 +49,4 @@ pub static ETAG_RE: &'static str = r#""0HmEESpoRuXjI9o47wPpRmueMqePF3leJjWufwSYk
 pub static ETAG_REFW: &'static str = r#""(0POrDriRK<0INQ?*r*ZYo0Qvj~97fCN-{q1elQ9""#;
 #[allow(dead_code)]
 /// The number of seconds to run each benchmark for.
-pub static SECS_PER_BENCH: u64 = 60;
+pub static SECS_PER_BENCH: u64 = 3;

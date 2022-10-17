@@ -1,25 +1,19 @@
-use actix_web::{get, web, App, Either, HttpResponse, HttpServer};
-use actix_web_rust_embed_responder::EmbeddedForWebFileResponse;
-use rust_embed_for_web::RustEmbed;
+use actix_web::{route, web, App, HttpServer};
+use actix_web_rust_embed_responder::EmbedResponse;
+use rust_embed_for_web::{EmbeddedFile, RustEmbed};
 
 #[derive(RustEmbed)]
 #[folder = "examples/assets/"]
 struct Embed;
 
-#[get("/{path:.*}")]
-async fn greet(params: web::Path<String>) -> Either<EmbeddedForWebFileResponse, HttpResponse> {
-    println!("{:?}", params.as_str());
-    let path = if params.is_empty() {
+#[route("/{path:.*}", method = "GET", method = "HEAD")]
+async fn greet(path: web::Path<String>) -> EmbedResponse<EmbeddedFile> {
+    let path = if path.is_empty() {
         "index.html"
     } else {
-        params.as_str()
+        path.as_str()
     };
-    let f = Embed::get(path);
-    if f.is_none() {
-        return Either::Right(HttpResponse::NotFound().finish());
-    }
-    let embed: EmbeddedForWebFileResponse = f.unwrap().into();
-    Either::Left(embed)
+    Embed::get(path).into()
 }
 
 #[actix_web::main] // or #[tokio::main]

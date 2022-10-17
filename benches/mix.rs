@@ -1,5 +1,6 @@
 use std::time::Duration;
 
+use actix_http::Method;
 use actix_web::{dev::ServiceResponse, test};
 use criterion::{criterion_group, criterion_main, Criterion};
 use lazy_static::lazy_static;
@@ -19,7 +20,7 @@ async fn test_re(
         Error = actix_web::Error,
     >,
 ) {
-    let path = "/re";
+    let path = "/re/";
     // Make a regular request
     let req = test::TestRequest::get().uri(path).to_request();
     let resp = test::call_and_read_body(&app, req).await;
@@ -51,6 +52,19 @@ async fn test_re(
         .to_request();
     let resp = test::call_service(&app, req).await;
     assert_eq!(resp.status(), 304);
+    // Try a HEAD request
+    let req = test::TestRequest::default()
+        .method(Method::HEAD)
+        .uri(path)
+        .to_request();
+    let resp = test::call_service(&app, req).await;
+    assert_eq!(resp.status(), 200);
+    // Get a not-found response
+    let req = test::TestRequest::get()
+        .uri(&format!("{path}foo-bar-baz"))
+        .to_request();
+    let resp = test::call_service(&app, req).await;
+    assert_eq!(resp.status(), 404);
 }
 
 async fn test_refw(
@@ -60,7 +74,7 @@ async fn test_refw(
         Error = actix_web::Error,
     >,
 ) {
-    let path = "/refw";
+    let path = "/refw/";
     // Make a regular request
     let req = test::TestRequest::get().uri(path).to_request();
     let resp = test::call_and_read_body(&app, req).await;
@@ -92,6 +106,19 @@ async fn test_refw(
         .to_request();
     let resp = test::call_service(&app, req).await;
     assert_eq!(resp.status(), 304);
+    // Try a HEAD request
+    let req = test::TestRequest::default()
+        .method(Method::HEAD)
+        .uri(path)
+        .to_request();
+    let resp = test::call_service(&app, req).await;
+    assert_eq!(resp.status(), 200);
+    // Get a not-found response
+    let req = test::TestRequest::get()
+        .uri(&format!("{path}foo-bar-baz"))
+        .to_request();
+    let resp = test::call_service(&app, req).await;
+    assert_eq!(resp.status(), 404);
 }
 
 fn criterion_benchmark(c: &mut Criterion) {

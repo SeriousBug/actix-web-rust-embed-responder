@@ -14,7 +14,7 @@ async fn test_re(
         Error = actix_web::Error,
     >,
 ) {
-    let req = test::TestRequest::get().uri("/re").to_request();
+    let req = test::TestRequest::get().uri("/re/").to_request();
     let resp = test::call_and_read_body(&app, req).await;
     assert!(resp.starts_with("<!DOCTYPE html>".as_bytes()))
 }
@@ -26,7 +26,7 @@ async fn test_refw(
         Error = actix_web::Error,
     >,
 ) {
-    let req = test::TestRequest::get().uri("/refw").to_request();
+    let req = test::TestRequest::get().uri("/refw/").to_request();
     let resp = test::call_and_read_body(&app, req).await;
     assert!(resp.starts_with("<!DOCTYPE html>".as_bytes()))
 }
