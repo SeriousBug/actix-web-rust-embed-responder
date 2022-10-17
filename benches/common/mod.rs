@@ -49,4 +49,4 @@ pub static ETAG_RE: &'static str = r#""0HmEESpoRuXjI9o47wPpRmueMqePF3leJjWufwSYk
 pub static ETAG_REFW: &'static str = r#""(0POrDriRK<0INQ?*r*ZYo0Qvj~97fCN-{q1elQ9""#;
 #[allow(dead_code)]
 /// The number of seconds to run each benchmark for.
-pub static SECS_PER_BENCH: u64 = 3;
+pub static SECS_PER_BENCH: u64 = 60;
