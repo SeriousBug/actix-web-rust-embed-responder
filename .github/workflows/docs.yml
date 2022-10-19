@@ -19,15 +19,7 @@ jobs:
       - name: Render docs
         uses: docker://pandoc/core:latest
         with:
-          args: >-
-            --from gfm
-            --to html5
-            --output docs/index.html
-            --css docs/style.css
-            --metadata title='Actix Web rust-embed responder'
-            --embed-resources
-            --standalone
-              Readme.md
+          args: --from gfm --to html5 --output docs/index.html --css docs/style.css --metadata title='Actix Web rust-embed responder' --embed-resources --standalone Readme.md
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v1
         with:
