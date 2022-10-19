@@ -8,6 +8,8 @@ on:
       - main
   workflow_dispatch:
 name: docs
+permissions:
+  contents: write
 jobs:
   render-docs:
     runs-on: ubuntu-latest
