@@ -6,6 +6,7 @@ on:
       - docs/reports/*
     branches:
       - main
+  workflow_dispatch:
 name: docs
 jobs:
   render-docs:
@@ -16,7 +17,7 @@ jobs:
       - name: Setup Pages
         uses: actions/configure-pages@v2
       - name: Render docs
-        uses: docker://pandoc:latest
+        uses: docker://pandoc/core:latest
         with:
           args: >-
             --from gfm
