@@ -1,5 +1,7 @@
 # Rust Embed Responder for Actix Web
 
+[![Test coverage report](https://img.shields.io/codecov/c/github/SeriousBug/actix-web-rust-embed-responder)](https://codecov.io/gh/SeriousBug/actix-web-rust-embed-responder)
+
 An Actix Web responder for serving files embedded into the server.
 You can embed files into your server, and then use this responder to serve them out of your server.
 For example, you can have a server serve its own assets, html, css, and javascript files, and more.
