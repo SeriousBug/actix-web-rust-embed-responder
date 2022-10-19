@@ -17,7 +17,7 @@ jobs:
       - name: Setup Pages
         uses: actions/configure-pages@v2
       - name: Render docs
-        uses: docker://pandoc/core:latest
+        uses: docker://pandoc/core:2.19
         with:
           args: >-
             --from gfm
