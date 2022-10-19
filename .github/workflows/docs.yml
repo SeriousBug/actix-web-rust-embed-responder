@@ -27,6 +27,7 @@ jobs:
             --metadata title='Actix Web rust-embed responder'
             --embed-resources
             --standalone
+              Readme.md
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v1
         with:
