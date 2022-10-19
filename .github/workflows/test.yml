@@ -3,9 +3,17 @@ on:
   push:
     branches:
       - "main"
+    paths:
+      - src/*
+      - examples/*
+      - benches/*
   pull_request:
     branches:
       - "*"
+    paths:
+      - src/*
+      - examples/*
+      - benches/*
 jobs:
   test:
     name: test

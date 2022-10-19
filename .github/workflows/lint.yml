@@ -1,4 +1,9 @@
-on: push
+on:
+  push:
+    paths:
+      - src/*
+      - examples/*
+      - benches/*
 name: lint checks
 jobs:
   lint:
