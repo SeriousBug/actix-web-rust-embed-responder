@@ -70,7 +70,7 @@ An additional drawback is that you will have to recompile to update files even d
 
 In exchange for these limitations, you get massively improved performance.
 Based on some basic benchmarks, using the fork is 20% to 3400% faster (more improvement with compression and larger files).
-For more detailed information check the [benchmark reports](#).
+For more detailed information check the [benchmark reports](https://seriousbug.github.io/actix-web-rust-embed-responder/reports/).
 
 ## Compared to `actix-plus-static-files`
 
