@@ -2,6 +2,9 @@
 name = "actix-web-rust-embed-responder"
 version = "0.1.0"
 edition = "2021"
+description = "An actix-web responder for rust-embed that implements cache revalidation and compressed responses."
+license = "MIT"
+readme = "Readme.md"
 
 [features]
 default = ["support-rust-embed", "support-rust-embed-for-web"]
