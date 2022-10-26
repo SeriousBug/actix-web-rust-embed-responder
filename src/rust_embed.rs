@@ -1,20 +1,23 @@
-use std::io::Write;
-
 use chrono::TimeZone;
-use flate2::Compression;
 use rust_embed::EmbeddedFile;
 
 use crate::embed::{EmbedRespondable, EmbedResponse};
 
 impl From<EmbeddedFile> for EmbedResponse<EmbeddedFile> {
     fn from(file: EmbeddedFile) -> Self {
-        EmbedResponse { file: Some(file) }
+        EmbedResponse {
+            file: Some(file),
+            compress: Default::default(),
+        }
     }
 }
 
 impl From<Option<EmbeddedFile>> for EmbedResponse<EmbeddedFile> {
     fn from(file: Option<EmbeddedFile>) -> Self {
-        EmbedResponse { file }
+        EmbedResponse {
+            file,
+            compress: Default::default(),
+        }
     }
 }
 
@@ -29,11 +32,7 @@ impl EmbedRespondable for EmbeddedFile {
     }
 
     fn data_gzip(&self) -> Option<Self::DataGzip> {
-        let mut compressed: Vec<u8> = Vec::new();
-        flate2::write::GzEncoder::new(&mut compressed, Compression::fast())
-            .write_all(&self.data[..])
-            .unwrap();
-        Some(compressed)
+        None
     }
 
     fn last_modified(&self) -> Option<Self::LastModified> {

@@ -1,7 +1,10 @@
 mod helper;
 mod parse;
 
+mod compress;
+pub use compress::*;
 mod embed;
+
 #[cfg(feature = "support-rust-embed")]
 mod rust_embed;
 #[cfg(feature = "support-rust-embed")]

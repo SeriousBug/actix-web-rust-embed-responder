@@ -3,13 +3,19 @@ use rust_embed_for_web::EmbeddedFile;
 
 impl From<EmbeddedFile> for EmbedResponse<EmbeddedFile> {
     fn from(file: EmbeddedFile) -> Self {
-        EmbedResponse { file: Some(file) }
+        EmbedResponse {
+            file: Some(file),
+            compress: Default::default(),
+        }
     }
 }
 
 impl From<Option<EmbeddedFile>> for EmbedResponse<EmbeddedFile> {
     fn from(file: Option<EmbeddedFile>) -> Self {
-        EmbedResponse { file }
+        EmbedResponse {
+            file,
+            compress: Default::default(),
+        }
     }
 }
 
