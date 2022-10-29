@@ -46,8 +46,8 @@ async fn serve_assets(path: web::Path<String>) -> EmbedResponse<EmbeddedFile> {
     };
     // There are implementations of `.into_response()` for both `EmbeddedFile` and `Option<EmbeddedFile>`.
     // With `Option<EmbeddedFile>`, this responder will also handle sending a 404 response for `None`.
-    // If you want to customize the `404` response, handle the `None` case yourself and use `.into_response()`
-    // on `RustEmbed`.
+    // If you want to customize the `404` response, you can handle the `None` case yourself: see the
+    // `custom-404.rs` test for an example.
     Embed::get(path).into_response().
 }
 
@@ -92,6 +92,22 @@ you can also enable on-the-fly compression with `Compress::Always`.
 Alternatively, you can use `Compress:IfWellKnown` which will only compress files
 known to be compressible such as html, css, and javascript.
 You can also disable compression entirely with `Compress::Never`.
+
+## Customizing responses
+
+Actix-web has a built-in response customization feature you can use.
+
+```rs
+#[route("/{path:.*}", method = "GET", method = "HEAD")]
+async fn handler(
+    path: web::Path<String>,
+) -> CustomizeResponder<EmbedResponse<EmbeddedFile>> {
+    EmbedRE::get(path)
+        .into_response()
+        .customize()
+        .insert_header(("X-My-Header", "My Header Value"))
+}
+```
 
 ## Compared to `actix-plus-static-files`
 
