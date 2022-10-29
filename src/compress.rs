@@ -4,41 +4,41 @@ use flate2::Compression;
 use lazy_static::lazy_static;
 use regex::Regex;
 
-/** When should the server try sending a compressed response? */
+/// When should the server try sending a compressed response?
 pub enum Compress {
-    /** Never compress responses, even if a precompressed response is available. */
+    /// Never compress responses, even if a precompressed response is available.
     Never,
-    /** Only use a compressed response if a precompressed response is available.
-     *
-     * With this option, compression won't be performed "on-the-fly".
-     * This significantly reduces the CPU usage, but will increase the amount of data transferred.
-     *
-     * This option will only work with `rust-embed-for-web` and only if compression has not been disabled.
-     * With `rust-embed`, or if the `rust-embed-for-web` resource is tagged with `#[gzip = false]` this is equivalent to Never.
-     */
+    ///  Only use a compressed response if a precompressed response is available.
+    ///
+    /// With this option, compression won't be performed "on-the-fly".
+    /// This significantly reduces the CPU usage, but will increase the amount of data transferred.
+    ///
+    /// This option will only work with `rust-embed-for-web` and only if compression has not been disabled.
+    /// With `rust-embed`, or if the `rust-embed-for-web` resource is tagged with `#[gzip = "false"]` this is equivalent to Never.
+    ///
     IfPrecompressed,
-    /** Perform on-the-fly compression if the file mime type is well known to be compressible.
-     *
-     * This option allows you to use compression with `rust-embed`, or with `rust-embed-for-web` when the resource is tagged with `#[gzip = false]`.
-     * This will use some CPU to compress the file on the fly before responding. Compressed versions are cached in memory.
-     */
+    /// Perform on-the-fly compression if the file mime type is well known to be compressible.
+    ///
+    /// This option allows you to use compression with `rust-embed-for-web` when the resource is tagged with `#[gzip = "false"]`.
+    /// This will use some CPU to compress the file on the fly before responding. Compressed versions are cached in memory.
+    ///
     IfWellKnown,
-    /** With this option set, the file is always compressed (as long as the client supports it).
-     *
-     * This is usually not a good idea unless you know that all the files embedded are compressible.
-     * File formats that are already compressed will not compress any further (such as image or video files),
-     * in which case trying to use compression is just a waste of CPU usage.
-     */
+    /// With this option set, the file is always compressed (as long as the client supports it).
+    ///
+    /// This is usually not a good idea unless you know that all the files embedded are compressible.
+    /// File formats that are already compressed will not compress any further (such as image or video files),
+    /// in which case trying to use compression is just a waste of CPU time.
+    ///
     Always,
 }
 
 impl Default for Compress {
     fn default() -> Self {
-        Self::IfWellKnown
+        Self::IfPrecompressed
     }
 }
 
-/** This is basically a list of text mime types. */
+/// This is basically a list of text mime types, plus javascript, json, and xml.
 pub(crate) fn is_well_known_compressible_mime_type(mime_type: &str) -> bool {
     lazy_static! {
         static ref RE: Regex =
@@ -48,19 +48,20 @@ pub(crate) fn is_well_known_compressible_mime_type(mime_type: &str) -> bool {
     RE.is_match(mime_type)
 }
 
-lazy_static! {
-    static ref CACHED_GZIP_DATA: RwLock<HashMap<String, Vec<u8>>> = RwLock::new(HashMap::new());
-}
-
-// Putting the data into cache could potentially fail
+// Putting the data into cache could potentially fail. That's okay if it does
+// happen, we have no way of handling that and we might as well just keep
+// serving files.
 #[allow(unused_must_use)]
-/** Compresses data with gzip encoding.
- *
- * The compressed files are cached based on the hash values provided.
- * Since we already have the hashes precomputed in rust-embed and rust-embed-for-web,
- * we just reuse that instead of trying to hash the data this function gets.
- */
+/// Compresses data with gzip encoding.
+///
+/// The compressed files are cached based on the hash values provided.
+/// Since we already have the hashes precomputed in rust-embed and rust-embed-for-web,
+/// we just reuse that instead of trying to hash the data this function gets.
 pub(crate) fn compress_data(hash: &str, data: &[u8]) -> Vec<u8> {
+    lazy_static! {
+        static ref CACHED_GZIP_DATA: RwLock<HashMap<String, Vec<u8>>> = RwLock::new(HashMap::new());
+    }
+
     if let Some(data_gzip) = CACHED_GZIP_DATA
         .read()
         .ok()

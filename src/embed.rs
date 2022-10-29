@@ -32,6 +32,10 @@ pub trait EmbedRespondable {
     fn mime_type(&self) -> Option<&str>;
 }
 
+/// An opaque wrapper around the embedded file.
+///
+/// Due to how traits work, we have to add this wrapper.
+/// It also allows us to make the response configurable.
 pub struct EmbedResponse<T: EmbedRespondable> {
     pub(crate) file: Option<T>,
     pub(crate) compress: Compress,
@@ -156,8 +160,16 @@ impl<T: EmbedRespondable> Responder for EmbedResponse<T> {
 }
 
 impl<T: EmbedRespondable> EmbedResponse<T> {
-    pub fn use_compression(&mut self, option: Compress) -> &mut Self {
+    /// Set the compression option to use for this response. Please see the
+    /// Compress type for allowed options.
+    pub fn use_compression(mut self, option: Compress) -> Self {
         self.compress = option;
         self
     }
+}
+
+/// A specialized version of `Into`, which can help you avoid specifying the type in `Into'.
+pub trait IntoResponse<T: EmbedRespondable> {
+    /// A specialized version of `Into::into`.
+    fn into_response(self) -> EmbedResponse<T>;
 }

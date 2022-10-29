@@ -1,7 +1,7 @@
 use chrono::TimeZone;
 use rust_embed::EmbeddedFile;
 
-use crate::embed::{EmbedRespondable, EmbedResponse};
+use crate::embed::{EmbedRespondable, EmbedResponse, IntoResponse};
 
 impl From<EmbeddedFile> for EmbedResponse<EmbeddedFile> {
     fn from(file: EmbeddedFile) -> Self {
@@ -18,6 +18,18 @@ impl From<Option<EmbeddedFile>> for EmbedResponse<EmbeddedFile> {
             file,
             compress: Default::default(),
         }
+    }
+}
+
+impl IntoResponse<EmbeddedFile> for EmbeddedFile {
+    fn into_response(self) -> EmbedResponse<EmbeddedFile> {
+        self.into()
+    }
+}
+
+impl IntoResponse<EmbeddedFile> for Option<EmbeddedFile> {
+    fn into_response(self) -> EmbedResponse<EmbeddedFile> {
+        self.into()
     }
 }
 

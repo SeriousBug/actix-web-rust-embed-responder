@@ -26,7 +26,7 @@ Then, setup your embed and handler, and add your responder.
 
 ```rs
 use actix_web::{route, web, App, HttpServer};
-use actix_web_rust_embed_responder::EmbedResponse;
+use actix_web_rust_embed_responder::{EmbedResponse, IntoResponse};
 use rust_embed::{EmbeddedFile, RustEmbed};
 
 #[derive(RustEmbed)]
@@ -44,11 +44,11 @@ async fn serve_assets(path: web::Path<String>) -> EmbedResponse<EmbeddedFile> {
     } else {
         path.as_str()
     };
-    // There are implementations of `.into()` for both `EmbeddedFile` and `Option<EmbeddedFile>`.
+    // There are implementations of `.into_response()` for both `EmbeddedFile` and `Option<EmbeddedFile>`.
     // With `Option<EmbeddedFile>`, this responder will also handle sending a 404 response for `None`.
-    // If you want to customize the `404` response, handle the `None` case yourself and use `.into()`
+    // If you want to customize the `404` response, handle the `None` case yourself and use `.into_response()`
     // on `RustEmbed`.
-    Embed::get(path).into()
+    Embed::get(path).into_response().
 }
 
 #[actix_web::main] // or #[tokio::main]
@@ -65,12 +65,33 @@ async fn main() -> std::io::Result<()> {
 The fork pre-computes certain things, like the header values that are used in responses.
 It also avoids unnecessary memory copies, and stores compressed version ahead of time.
 This can significantly increase the size of your compiled binary, but in exchange improves performance significantly.
-Additionally, you can disable the ahead-of-time compression which will minimize the increase (see `rust-embed-for-web` readme for details).
+You can disable the pre-compression which will minimize the increase (see `rust-embed-for-web` readme for details).
 An additional drawback is that you will have to recompile to update files even during development.
 
 In exchange for these limitations, you get massively improved performance.
-Based on some basic benchmarks, using the fork is 20% to 3400% faster (more improvement with compression and larger files).
+Based on some benchmarks, using the fork is more than 20% faster, with more improvement on larger files or when enabling compression.
 For more detailed information check the [benchmark reports](https://seriousbug.github.io/actix-web-rust-embed-responder/reports/).
+
+## Compression
+
+With `rust-embed-for-web`, this crate will serve compressed responses to clients
+that support them if compression is enabled for the embed (you didn't add
+`#[gzip = "false"]`) and the file being served actually benefits from compression.
+
+With `rust-embed`, compressed responses are not served by default. However you
+can set `.use_compression(Compress::Always)` to turn it on. If you do, the files
+will be compressed on the fly and cached. This will always compress files, even
+for files like image files that are unlikely to benefit from compression.
+
+```rs
+Embed::get(path).into_response().use_compression(Compress::Always)
+```
+
+For `rust-embed-for-web`, if you disabled pre-compression with `#[gzip = "false"]`,
+you can also enable on-the-fly compression with `Compress::Always`.
+Alternatively, you can use `Compress:IfWellKnown` which will only compress files
+known to be compressible such as html, css, and javascript.
+You can also disable compression entirely with `Compress::Never`.
 
 ## Compared to `actix-plus-static-files`
 

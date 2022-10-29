@@ -15,4 +15,4 @@ mod rust_embed_for_web;
 #[cfg(feature = "support-rust-embed-for-web")]
 pub use crate::rust_embed_for_web::*;
 
-pub use embed::{EmbedRespondable, EmbedResponse};
+pub use embed::{EmbedRespondable, EmbedResponse, IntoResponse};
