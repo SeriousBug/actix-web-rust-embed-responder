@@ -4,30 +4,61 @@ use actix_web::{
     HttpRequest, HttpResponse, Responder,
 };
 
-use crate::{helper::accepts_gzip, parse::parse_if_none_match_value};
+use crate::{
+    compress::Compress, compress_data, helper::accepts_gzip, is_well_known_compressible_mime_type,
+    parse::parse_if_none_match_value,
+};
 
 /// A trait that both rust_embed and rust-embed-for-web implement. We implement
 /// the responder in terms of this trait, so the code isn't duplicated for both
 /// embed crates.
 pub trait EmbedRespondable {
-    type Data: MessageBody + 'static;
-    type DataGzip: MessageBody + 'static;
+    type Data: MessageBody + 'static + AsRef<[u8]>;
+    type DataGzip: MessageBody + 'static + AsRef<[u8]>;
     type ETag: AsRef<str>;
     type LastModified: AsRef<str>;
 
+    /** The contents of the embedded file. */
     fn data(&self) -> Self::Data;
+    /** The contents of the file compressed, if precompression has been done. None if the file was not precompressed. */
     fn data_gzip(&self) -> Option<Self::DataGzip>;
+    /** The timestamp of when the file was last modified. */
     fn last_modified_timestamp(&self) -> Option<i64>;
+    /** The rfc2822 encoded last modified date. */
     fn last_modified(&self) -> Option<Self::LastModified>;
+    /** The ETag value for the file, based on its hash. */
     fn etag(&self) -> Self::ETag;
+    /** The mime type for the file, if one is or can be guessed from the file. */
     fn mime_type(&self) -> Option<&str>;
 }
 
+/// An opaque wrapper around the embedded file.
+///
+/// Due to how traits work, we have to add this wrapper.
+/// It also allows us to make the response configurable.
 pub struct EmbedResponse<T: EmbedRespondable> {
     pub(crate) file: Option<T>,
+    pub(crate) compress: Compress,
 }
 
-fn send_response<T: EmbedRespondable>(req: &HttpRequest, file: &T) -> HttpResponse {
+fn should_compress<T: EmbedRespondable>(req: &HttpRequest, file: &T, compress: Compress) -> bool {
+    accepts_gzip(req)
+        && match compress {
+            Compress::Never => false,
+            Compress::IfPrecompressed => file.data_gzip().is_some(),
+            Compress::IfWellKnown => file
+                .mime_type()
+                .map(is_well_known_compressible_mime_type)
+                .unwrap_or(false),
+            Compress::Always => true,
+        }
+}
+
+fn send_response<T: EmbedRespondable>(
+    req: &HttpRequest,
+    file: &T,
+    compress: Compress,
+) -> HttpResponse {
     let mut resp = HttpResponse::Ok();
 
     resp.append_header(("ETag", file.etag().as_ref()));
@@ -52,10 +83,13 @@ fn send_response<T: EmbedRespondable>(req: &HttpRequest, file: &T) -> HttpRespon
         // For GET requests, we do send the file body. Depending on whether the
         // client accepts compressed files or not, we may send the compressed
         // version.
-        if accepts_gzip(req) {
-            if let Some(data_gzip) = file.data_gzip() {
-                resp.append_header(("Content-Encoding", "gzip"));
-                return resp.body(data_gzip);
+        if should_compress(req, file, compress) {
+            resp.append_header(("Content-Encoding", "gzip"));
+            match file.data_gzip() {
+                Some(data_gzip) => return resp.body(data_gzip),
+                None => {
+                    return resp.body(compress_data(file.etag().as_ref(), file.data().as_ref()))
+                }
             }
         }
         resp.body(file.data())
@@ -94,7 +128,7 @@ impl<T: EmbedRespondable> Responder for EmbedResponse<T> {
                     if req_etags.contains(&etag) {
                         return HttpResponse::NotModified().finish();
                     } else {
-                        return send_response(req, &file);
+                        return send_response(req, &file, self.compress);
                     }
                 }
                 // If there was no `If-None-Match` condition, check for
@@ -110,7 +144,7 @@ impl<T: EmbedRespondable> Responder for EmbedResponse<T> {
                     {
                         // It's been modified since then
                         if last_modified_timestamp > if_unmodified_since.timestamp() {
-                            return send_response(req, &file);
+                            return send_response(req, &file, self.compress);
                         } else {
                             return HttpResponse::NotModified().finish();
                         }
@@ -118,9 +152,24 @@ impl<T: EmbedRespondable> Responder for EmbedResponse<T> {
                 }
                 // If there was no `If-Unmodified-Since` header either, that
                 // means the client does not have this file cached.
-                send_response(req, &file)
+                send_response(req, &file, self.compress)
             }
             None => HttpResponse::NotFound().finish(),
         }
     }
+}
+
+impl<T: EmbedRespondable> EmbedResponse<T> {
+    /// Set the compression option to use for this response. Please see the
+    /// Compress type for allowed options.
+    pub fn use_compression(mut self, option: Compress) -> Self {
+        self.compress = option;
+        self
+    }
+}
+
+/// A specialized version of `Into`, which can help you avoid specifying the type in `Into'.
+pub trait IntoResponse<T: EmbedRespondable> {
+    /// A specialized version of `Into::into`.
+    fn into_response(self) -> EmbedResponse<T>;
 }

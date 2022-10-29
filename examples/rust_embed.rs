@@ -1,5 +1,5 @@
 use actix_web::{route, web, App, HttpServer};
-use actix_web_rust_embed_responder::EmbedResponse;
+use actix_web_rust_embed_responder::{EmbedResponse, IntoResponse};
 use rust_embed::{EmbeddedFile, RustEmbed};
 
 #[derive(RustEmbed)]
@@ -13,7 +13,7 @@ async fn greet(path: web::Path<String>) -> EmbedResponse<EmbeddedFile> {
     } else {
         path.as_str()
     };
-    Embed::get(path).into()
+    Embed::get(path).into_response()
 }
 
 #[actix_web::main] // or #[tokio::main]
