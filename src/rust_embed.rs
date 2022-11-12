@@ -38,6 +38,7 @@ impl EmbedRespondable for EmbeddedFile {
     type DataGzip = Vec<u8>;
     type ETag = String;
     type LastModified = String;
+    type MimeType = String;
 
     fn data(&self) -> Self::Data {
         self.data.clone().into_owned()
@@ -64,7 +65,7 @@ impl EmbedRespondable for EmbeddedFile {
         format!("\"{}\"", base64::encode(self.metadata.sha256_hash()))
     }
 
-    fn mime_type(&self) -> Option<&str> {
+    fn mime_type(&self) -> Option<Self::MimeType> {
         // rust-embed doesn't include the filename for the embedded file, so we
         // can't guess the mime type. We could add `xdg-mime` to guess based on
         // contents, but it will require the shared mime database to be
