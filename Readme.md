@@ -17,7 +17,7 @@ First, add this crate and `rust-embed` or `rust-embed-for-web` into your `Cargo.
 [dependencies]
 actix-web = "4.2"
 rust-embed = "6.4" # or rust-embed-for-web = "11.1"
-actix-web-rust-embed-responder = "2.1.0"
+actix-web-rust-embed-responder = "2.1.1"
 ```
 
 Then, setup your embed and handler, and add your responder.
@@ -119,9 +119,9 @@ By default, this crate enables support for both `rust-embed` and
 
 ```toml
 # If you are using `rust-embed`:
-actix-web-rust-embed-responder = { version = "2.1.0", default-features = false, features = ["support-rust-embed"] }
+actix-web-rust-embed-responder = { version = "2.1.1", default-features = false, features = ["support-rust-embed"] }
 # If you are using `rust-embed-for-web`:
-actix-web-rust-embed-responder = { version = "2.1.0", default-features = false, features = ["support-rust-embed-for-web"] }
+actix-web-rust-embed-responder = { version = "2.1.1", default-features = false, features = ["support-rust-embed-for-web"] }
 ```
 
 There's also a feature flag `always-embed` which is disabled by default. This is only useful for testing, you can ignore this feature.
