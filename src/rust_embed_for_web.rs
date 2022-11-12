@@ -3,8 +3,23 @@ use actix_web::body::MessageBody;
 use rust_embed_for_web::{DynamicFile, EmbedableFile, EmbeddedFile};
 
 #[cfg(all(debug_assertions, not(feature = "always-embed")))]
+/// This is an alias that changes whether it refers to a `DynamicFile` or
+/// `EmbeddedFile` based on whether it's in debug or release mode.
+///
+/// This is necessary if you are trying to avoid using `dyn` trait objects.
+/// Check [this example](https://github.com/SeriousBug/actix-web-rust-embed-responder/blob/main/examples/rust_embed_for_web.rs)
+/// for details.
 pub type EmbedableFileResponse = WebEmbedableFile<DynamicFile>;
+
+// --> If you update the docs above, copy and paste it below too!
+
 #[cfg(any(not(debug_assertions), feature = "always-embed"))]
+/// This is an alias that changes whether it refers to a `DynamicFile` or
+/// `EmbeddedFile` based on whether it's in debug or release mode.
+///
+/// This is necessary if you are trying to avoid using `dyn` trait objects.
+/// Check [this example](https://github.com/SeriousBug/actix-web-rust-embed-responder/blob/main/examples/rust_embed_for_web.rs)
+/// for details.
 pub type EmbedableFileResponse = WebEmbedableFile<EmbeddedFile>;
 
 impl From<EmbeddedFile> for EmbedResponse<WebEmbedableFile<EmbeddedFile>> {
@@ -67,6 +82,11 @@ impl IntoResponse<WebEmbedableFile<DynamicFile>> for Option<DynamicFile> {
     }
 }
 
+/// A wrapper around the 2 types of embedable files that `rust-embed-for-web` provides.
+///
+/// You shouldn't manually create objects of this struct, you should rely on
+/// `.into_response()` or `.into()` to create these from `DynamicFile`s or
+/// `EmbeddedFile`s you get from your `RustEmbed`.
 pub struct WebEmbedableFile<T: EmbedableFile>(T);
 
 impl<T: EmbedableFile> EmbedRespondable for WebEmbedableFile<T>

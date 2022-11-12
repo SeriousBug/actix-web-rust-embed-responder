@@ -1,5 +1,6 @@
 use chrono::TimeZone;
 use rust_embed::EmbeddedFile;
+use std::ops::Deref;
 
 use crate::embed::{EmbedRespondable, EmbedResponse, IntoResponse};
 
@@ -72,5 +73,13 @@ impl EmbedRespondable for EmbeddedFile {
         // available at runtime. In any case, it's okay if we just let the
         // browser guess the mime type.
         None
+    }
+}
+
+impl Deref for EmbedResponse<EmbeddedFile> {
+    type Target = Option<EmbeddedFile>;
+
+    fn deref(&self) -> &Self::Target {
+        &self.file
     }
 }

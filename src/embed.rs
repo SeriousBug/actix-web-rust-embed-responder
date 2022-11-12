@@ -9,9 +9,12 @@ use crate::{
     parse::parse_if_none_match_value,
 };
 
-/// A trait that both rust_embed and rust-embed-for-web implement. We implement
-/// the responder in terms of this trait, so the code isn't duplicated for both
-/// embed crates.
+/// A common trait used internally to create HTTP responses.
+///
+/// This trait is internally implemented for both `rust-embed` and
+/// `rust-embed-for-web` types. You could also implement it for your own type if
+/// you wish to use the response handling capabilities of this crate without
+/// embedded files.
 pub trait EmbedRespondable {
     type Data: MessageBody + 'static + AsRef<[u8]>;
     type DataGzip: MessageBody + 'static + AsRef<[u8]>;
@@ -19,24 +22,24 @@ pub trait EmbedRespondable {
     type ETag: AsRef<str>;
     type LastModified: AsRef<str>;
 
-    /** The contents of the embedded file. */
+    /// The contents of the embedded file.
     fn data(&self) -> Self::Data;
-    /** The contents of the file compressed, if precompression has been done. None if the file was not precompressed. */
+    /// The contents of the file compressed, if precompression has been done. None if the file was not precompressed.
     fn data_gzip(&self) -> Option<Self::DataGzip>;
-    /** The timestamp of when the file was last modified. */
+    /// The UNIX timestamp of when the file was last modified.
     fn last_modified_timestamp(&self) -> Option<i64>;
-    /** The rfc2822 encoded last modified date. */
+    /// The rfc2822 encoded last modified date.
     fn last_modified(&self) -> Option<Self::LastModified>;
-    /** The ETag value for the file, based on its hash. */
+    /// The ETag value for the file, based on its hash.
     fn etag(&self) -> Self::ETag;
-    /** The mime type for the file, if one is or can be guessed from the file. */
+    /// The mime type for the file, if one has been guessed.
     fn mime_type(&self) -> Option<Self::MimeType>;
 }
 
 /// An opaque wrapper around the embedded file.
 ///
-/// Due to how traits work, we have to add this wrapper.
-/// It also allows us to make the response configurable.
+/// You don't manually create these objects, you should use `.into_response()`
+/// or `.into()` to convert an embedded file into an `EmbedResponse`.
 pub struct EmbedResponse<T: EmbedRespondable> {
     pub(crate) file: Option<T>,
     pub(crate) compress: Compress,

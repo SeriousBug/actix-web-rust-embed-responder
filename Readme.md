@@ -1,10 +1,10 @@
-# Rust Embed Responder for Actix Web
+# [Rust Embed Responder for Actix Web](https://github.com/SeriousBug/actix-web-rust-embed-responder)
 
-[![Crates.io](https://img.shields.io/crates/v/actix-web-rust-embed-responder)](https://crates.io/crates/actix-web-rust-embed-responder) [![tests](https://img.shields.io/github/workflow/status/SeriousBug/actix-web-rust-embed-responder/tests?label=tests)](https://github.com/SeriousBug/actix-web-rust-embed-responder/actions/workflows/coverage.yml) [![Test coverage report](https://img.shields.io/codecov/c/github/SeriousBug/actix-web-rust-embed-responder)](https://codecov.io/gh/SeriousBug/actix-web-rust-embed-responder) [![lint checks](https://img.shields.io/github/workflow/status/SeriousBug/actix-web-rust-embed-responder/lint%20checks?label=lint)](https://github.com/SeriousBug/actix-web-rust-embed-responder/actions/workflows/lint.yml) [![MIT license](https://img.shields.io/github/license/SeriousBug/actix-web-rust-embed-responder)](https://github.com/SeriousBug/actix-web-rust-embed-responder/blob/main/LICENSE.txt)
+[![Crates.io](https://img.shields.io/crates/v/actix-web-rust-embed-responder)](https://crates.io/crates/actix-web-rust-embed-responder) [![docs.rs](https://img.shields.io/docsrs/actix-web-rust-embed-responder)]() [![tests](https://img.shields.io/github/workflow/status/SeriousBug/actix-web-rust-embed-responder/tests?label=tests)](https://github.com/SeriousBug/actix-web-rust-embed-responder/actions/workflows/coverage.yml) [![Test coverage report](https://img.shields.io/codecov/c/github/SeriousBug/actix-web-rust-embed-responder)](https://codecov.io/gh/SeriousBug/actix-web-rust-embed-responder) [![lint checks](https://img.shields.io/github/workflow/status/SeriousBug/actix-web-rust-embed-responder/lint%20checks?label=lint)](https://github.com/SeriousBug/actix-web-rust-embed-responder/actions/workflows/lint.yml) [![MIT license](https://img.shields.io/github/license/SeriousBug/actix-web-rust-embed-responder)](https://github.com/SeriousBug/actix-web-rust-embed-responder/blob/main/LICENSE.txt)
 
 An Actix Web responder for serving files embedded into the server.
 You can embed files into your server, and then use this responder to serve them out of your server.
-For example, you can have a server serve its own assets, html, css, and javascript files, and more.
+For example you can have a web app serve its own assets, html, css, javascript files, and more.
 
 This crate implements responders for [rust embed](https://docs.rs/rust-embed/latest/rust_embed/index.html),
 as well as a more efficient fork [rust-embed-for-web](https://github.com/SeriousBug/rust-embed-for-web).
@@ -15,11 +15,9 @@ First, add this crate and `rust-embed` or `rust-embed-for-web` into your `Cargo.
 
 ```toml
 [dependencies]
-# These numbers are not regularly updated, check
-# crates.io to make sure you have the latest versions
 actix-web = "4.2"
 rust-embed = "6.4"
-actix-web-rust-embed-responder = "0.1"
+actix-web-rust-embed-responder = "2.0.1"
 ```
 
 Then, setup your embed and handler, and add your responder.
