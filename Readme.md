@@ -107,6 +107,11 @@ async fn handler(
 }
 ```
 
+## Examples
+
+There are examples for both `rust-embed` and `rust-embed-for-web` in the [examples folder](https://github.com/SeriousBug/actix-web-rust-embed-responder/tree/main/examples).
+You can run these examples by using `cargo run --example rust_embed --release` or `cargo run --example rust_embed_for_web --release`, then visiting `localhost:8080` in your browser.
+
 ## Compared to `actix-plus-static-files`
 
 Compared to [actix-plus-static-files](https://crates.io/crates/actix-plus-static-files):

@@ -5,8 +5,8 @@ use actix_web::{
 };
 
 use crate::{
-    compress::Compress, compress_data, helper::accepts_gzip, is_well_known_compressible_mime_type,
-    parse::parse_if_none_match_value,
+    compress::Compress, compress_data_br, compress_data_gzip, helper::accepts_encoding,
+    is_well_known_compressible_mime_type, parse::parse_if_none_match_value,
 };
 
 /// A common trait used internally to create HTTP responses.
@@ -18,14 +18,21 @@ use crate::{
 pub trait EmbedRespondable {
     type Data: MessageBody + 'static + AsRef<[u8]>;
     type DataGzip: MessageBody + 'static + AsRef<[u8]>;
+    type DataBr: MessageBody + 'static + AsRef<[u8]>;
     type MimeType: AsRef<str>;
     type ETag: AsRef<str>;
     type LastModified: AsRef<str>;
 
     /// The contents of the embedded file.
     fn data(&self) -> Self::Data;
-    /// The contents of the file compressed, if precompression has been done. None if the file was not precompressed.
+    /// The contents of the file compressed with gzip.
+    ///
+    /// `Some` if precompression has been done, `None` if the file was not precompressed.
     fn data_gzip(&self) -> Option<Self::DataGzip>;
+    /// The contents of the file compressed with gzip.
+    ///
+    /// `Some` if precompression has been done, `None` if the file was not precompressed.
+    fn data_br(&self) -> Option<Self::DataBr>;
     /// The UNIX timestamp of when the file was last modified.
     fn last_modified_timestamp(&self) -> Option<i64>;
     /// The rfc2822 encoded last modified date.
@@ -45,17 +52,37 @@ pub struct EmbedResponse<T: EmbedRespondable> {
     pub(crate) compress: Compress,
 }
 
-fn should_compress<T: EmbedRespondable>(req: &HttpRequest, file: &T, compress: Compress) -> bool {
-    accepts_gzip(req)
-        && match compress {
-            Compress::Never => false,
-            Compress::IfPrecompressed => file.data_gzip().is_some(),
-            Compress::IfWellKnown => file
-                .mime_type()
-                .map(|v| is_well_known_compressible_mime_type(v.as_ref()))
-                .unwrap_or(false),
-            Compress::Always => true,
-        }
+enum ShouldCompress {
+    Gzip,
+    Brotli,
+    No,
+}
+
+fn should_compress<T: EmbedRespondable>(
+    req: &HttpRequest,
+    file: &T,
+    compress: &Compress,
+) -> ShouldCompress {
+    let should_compress_for_encoding =
+        |is_precompressed_for_encoding: bool, mime_type: Option<T::MimeType>, encoding: &str| {
+            accepts_encoding(req, encoding)
+                && match compress {
+                    Compress::Never => false,
+                    Compress::IfPrecompressed => is_precompressed_for_encoding,
+                    Compress::IfWellKnown => mime_type
+                        .map(|v| is_well_known_compressible_mime_type(v.as_ref()))
+                        .unwrap_or(false),
+                    Compress::Always => true,
+                }
+        };
+
+    if should_compress_for_encoding(file.data_br().is_some(), file.mime_type(), "br") {
+        ShouldCompress::Brotli
+    } else if should_compress_for_encoding(file.data_gzip().is_some(), file.mime_type(), "gzip") {
+        ShouldCompress::Gzip
+    } else {
+        ShouldCompress::No
+    }
 }
 
 fn send_response<T: EmbedRespondable>(
@@ -87,16 +114,27 @@ fn send_response<T: EmbedRespondable>(
         // For GET requests, we do send the file body. Depending on whether the
         // client accepts compressed files or not, we may send the compressed
         // version.
-        if should_compress(req, file, compress) {
-            resp.append_header(("Content-Encoding", "gzip"));
-            match file.data_gzip() {
-                Some(data_gzip) => return resp.body(data_gzip),
-                None => {
-                    return resp.body(compress_data(file.etag().as_ref(), file.data().as_ref()))
+        let encoding_choice = should_compress(req, file, &compress);
+        match encoding_choice {
+            ShouldCompress::Brotli => {
+                resp.append_header(("Content-Encoding", "br"));
+                match file.data_br() {
+                    Some(data_br) => resp.body(data_br),
+                    None => resp.body(compress_data_br(file.etag().as_ref(), file.data().as_ref())),
                 }
             }
+            ShouldCompress::Gzip => {
+                resp.append_header(("Content-Encoding", "gzip"));
+                match file.data_gzip() {
+                    Some(data_gzip) => resp.body(data_gzip),
+                    None => resp.body(compress_data_gzip(
+                        file.etag().as_ref(),
+                        file.data().as_ref(),
+                    )),
+                }
+            }
+            ShouldCompress::No => resp.body(file.data()),
         }
-        resp.body(file.data())
     }
 }
 
