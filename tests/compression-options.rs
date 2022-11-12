@@ -4,7 +4,9 @@ use actix_web::{
     dev::{ServiceFactory, ServiceRequest, ServiceResponse},
     route, web, App,
 };
-use actix_web_rust_embed_responder::{Compress, EmbedResponse, IntoResponse};
+use actix_web_rust_embed_responder::{
+    Compress, EmbedResponse, EmbedableFileResponse, IntoResponse,
+};
 
 #[derive(rust_embed::RustEmbed)]
 #[folder = "examples/assets/"]
@@ -16,7 +18,7 @@ struct EmbedREFW;
 
 #[derive(rust_embed_for_web::RustEmbed)]
 #[folder = "examples/assets/"]
-#[gzip = "false"]
+#[gzip = false]
 struct EmbedREFWNoGzip;
 
 #[route("/re/{compress}/{path:.*}", method = "GET", method = "HEAD")]
@@ -41,9 +43,7 @@ async fn re_handler(
 }
 
 #[route("/refw/{compress}/{path:.*}", method = "GET", method = "HEAD")]
-async fn refw_handler(
-    params: web::Path<(String, String)>,
-) -> EmbedResponse<rust_embed_for_web::EmbeddedFile> {
+async fn refw_handler(params: web::Path<(String, String)>) -> EmbedResponse<EmbedableFileResponse> {
     let (compress, path) = params.into_inner();
     let path = if path.is_empty() {
         "index.html"
@@ -65,7 +65,7 @@ async fn refw_handler(
 #[route("/refw-nogz/{compress}/{path:.*}", method = "GET", method = "HEAD")]
 async fn refw_nogz_handler(
     params: web::Path<(String, String)>,
-) -> EmbedResponse<rust_embed_for_web::EmbeddedFile> {
+) -> EmbedResponse<EmbedableFileResponse> {
     let (compress, path) = params.into_inner();
     let path = if path.is_empty() {
         "index.html"

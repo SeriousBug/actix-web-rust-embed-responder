@@ -15,6 +15,7 @@ use crate::{
 pub trait EmbedRespondable {
     type Data: MessageBody + 'static + AsRef<[u8]>;
     type DataGzip: MessageBody + 'static + AsRef<[u8]>;
+    type MimeType: AsRef<str>;
     type ETag: AsRef<str>;
     type LastModified: AsRef<str>;
 
@@ -29,7 +30,7 @@ pub trait EmbedRespondable {
     /** The ETag value for the file, based on its hash. */
     fn etag(&self) -> Self::ETag;
     /** The mime type for the file, if one is or can be guessed from the file. */
-    fn mime_type(&self) -> Option<&str>;
+    fn mime_type(&self) -> Option<Self::MimeType>;
 }
 
 /// An opaque wrapper around the embedded file.
@@ -48,7 +49,7 @@ fn should_compress<T: EmbedRespondable>(req: &HttpRequest, file: &T, compress: C
             Compress::IfPrecompressed => file.data_gzip().is_some(),
             Compress::IfWellKnown => file
                 .mime_type()
-                .map(is_well_known_compressible_mime_type)
+                .map(|v| is_well_known_compressible_mime_type(v.as_ref()))
                 .unwrap_or(false),
             Compress::Always => true,
         }
@@ -66,7 +67,7 @@ fn send_response<T: EmbedRespondable>(
         resp.append_header(("Last-Modified", last_modified.as_ref()));
     }
     if let Some(mime_type) = file.mime_type() {
-        resp.append_header(("Content-Type", mime_type));
+        resp.append_header(("Content-Type", mime_type.as_ref()));
     }
 
     // This doesn't actually mean "no caching", it means revalidate before

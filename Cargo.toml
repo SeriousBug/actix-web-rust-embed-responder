@@ -1,6 +1,6 @@
 [package]
 name = "actix-web-rust-embed-responder"
-version = "1.0.0"
+version = "2.0.0"
 edition = "2021"
 description = "An actix-web responder for rust-embed that implements cache revalidation and compressed responses."
 license = "MIT"
@@ -10,6 +10,8 @@ readme = "Readme.md"
 default = ["support-rust-embed", "support-rust-embed-for-web"]
 support-rust-embed = ["rust-embed", "base64", "chrono"]
 support-rust-embed-for-web = ["rust-embed-for-web"]
+# testing only, please ignore!
+always-embed = ["rust-embed-for-web/always-embed"]
 
 [dependencies]
 actix-web = "4.2"
@@ -22,7 +24,7 @@ rust-embed = { version = "6.4", optional = true }
 base64 = { version = "0.13", optional = true }    # ETag
 chrono = { version = "0.4", optional = true }     # Last-Modified
 # rust-embed-for-web only
-rust-embed-for-web = { version = "^9.0.1", optional = true }
+rust-embed-for-web = { version = "11.0", optional = true }
 
 [dev-dependencies]
 criterion = { version = "0.4", features = ["async_tokio"] }
@@ -71,3 +73,11 @@ harness = false
 # Benchmark for a mixed of cached and non-cached responses, some with and some without compression.
 name = "mix"
 harness = false
+
+#
+# Tests. Not all tests are listed here, only ones that require special options.
+#
+[[test]]
+name = "compression-options"
+path = "tests/compression-options.rs"
+required-features = ["always-embed"]

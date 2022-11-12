@@ -1,5 +1,5 @@
 use actix_web::{dev::ServiceResponse, route, web, App};
-use actix_web_rust_embed_responder::EmbedResponse;
+use actix_web_rust_embed_responder::{EmbedResponse, EmbedableFileResponse};
 use tokio::runtime::Runtime;
 
 #[derive(rust_embed::RustEmbed)]
@@ -21,7 +21,7 @@ async fn re_handler(path: web::Path<String>) -> EmbedResponse<rust_embed::Embedd
 }
 
 #[route("/refw/{path:.*}", method = "GET", method = "HEAD")]
-async fn refw_handler(path: web::Path<String>) -> EmbedResponse<rust_embed_for_web::EmbeddedFile> {
+async fn refw_handler(path: web::Path<String>) -> EmbedResponse<EmbedableFileResponse> {
     let path = if path.is_empty() {
         "index.html"
     } else {
