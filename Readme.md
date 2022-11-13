@@ -74,7 +74,7 @@ For more detailed information check the [benchmark reports](https://seriousbug.g
 
 With `rust-embed-for-web`, this crate will serve compressed responses to clients
 that support them if compression is enabled for the embed (you didn't add
-`#[gzip = "false"]`) and the file being served actually benefits from compression.
+`#[gzip = false]` and `#[br = false]`) and the file being served actually benefits from compression.
 
 With `rust-embed`, compressed responses are not served by default. However you
 can set `.use_compression(Compress::Always)` to turn it on. If you do, the files
