@@ -1,6 +1,7 @@
+use base64::{engine::general_purpose::STANDARD_NO_PAD as Base64Encoder, Engine};
 use chrono::TimeZone;
 use rust_embed::EmbeddedFile;
-use std::ops::Deref;
+use std::{borrow::Cow, ops::Deref};
 
 use crate::embed::{EmbedRespondable, EmbedResponse, IntoResponse};
 
@@ -35,7 +36,7 @@ impl IntoResponse<EmbeddedFile> for Option<EmbeddedFile> {
 }
 
 impl EmbedRespondable for EmbeddedFile {
-    type Data = Vec<u8>;
+    type Data = Cow<'static, [u8]>;
     type DataGzip = Vec<u8>;
     type DataBr = Vec<u8>;
     type ETag = String;
@@ -43,7 +44,7 @@ impl EmbedRespondable for EmbeddedFile {
     type MimeType = String;
 
     fn data(&self) -> Self::Data {
-        self.data.clone().into_owned()
+        self.data.clone()
     }
 
     fn data_gzip(&self) -> Option<Self::DataGzip> {
@@ -68,7 +69,7 @@ impl EmbedRespondable for EmbeddedFile {
     }
 
     fn etag(&self) -> Self::ETag {
-        format!("\"{}\"", base64::encode(self.metadata.sha256_hash()))
+        format!("\"{}\"", Base64Encoder.encode(self.metadata.sha256_hash()))
     }
 
     fn mime_type(&self) -> Option<Self::MimeType> {

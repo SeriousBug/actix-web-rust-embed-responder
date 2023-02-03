@@ -61,13 +61,12 @@ async fn main() -> std::io::Result<()> {
 ## About the `rust-embed-for-web` fork
 
 The fork pre-computes certain things, like the header values that are used in responses.
-It also avoids unnecessary memory copies, and stores compressed version ahead of time.
+It can also compressed the data ahead of time.
 This can significantly increase the size of your compiled binary, but in exchange improves performance significantly.
 You can disable the pre-compression which will minimize the increase (see `rust-embed-for-web` readme for details).
-An additional drawback is that you will have to recompile to update files even during development.
 
-In exchange for these limitations, you get massively improved performance.
-Based on some benchmarks, using the fork is more than 20% faster, with more improvement on larger files or when enabling compression.
+In exchange for these limitations, you get improved performance.
+Based on some benchmarks, using the fork is 16% to 35% faster.
 For more detailed information check the [benchmark reports](https://seriousbug.github.io/actix-web-rust-embed-responder/reports/).
 
 ## Compression
