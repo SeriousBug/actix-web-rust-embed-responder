@@ -34,7 +34,7 @@ impl From<EmbeddedFile> for EmbedResponse<WebEmbedableFile<EmbeddedFile>> {
 impl From<Option<EmbeddedFile>> for EmbedResponse<WebEmbedableFile<EmbeddedFile>> {
     fn from(file: Option<EmbeddedFile>) -> Self {
         EmbedResponse {
-            file: file.map(|f| WebEmbedableFile(f)),
+            file: file.map(WebEmbedableFile),
             compress: Default::default(),
         }
     }
@@ -64,7 +64,7 @@ impl From<DynamicFile> for EmbedResponse<WebEmbedableFile<DynamicFile>> {
 impl From<Option<DynamicFile>> for EmbedResponse<WebEmbedableFile<DynamicFile>> {
     fn from(file: Option<DynamicFile>) -> Self {
         EmbedResponse {
-            file: file.map(|f| WebEmbedableFile(f)),
+            file: file.map(WebEmbedableFile),
             compress: Default::default(),
         }
     }

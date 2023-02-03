@@ -14,7 +14,7 @@ support-rust-embed-for-web = ["rust-embed-for-web"]
 always-embed = ["rust-embed-for-web/always-embed"]
 
 [dependencies]
-actix-web = "4.2"
+actix-web = "4.3"
 futures-core = "0.3"
 lazy_static = "1.4"  # static caching stuff
 regex = "1.6"        # parsing header valuesg
@@ -23,7 +23,7 @@ brotli = "3.3"       # br compressed responses when doing on-the-fly compression
 chrono = "0.4"       # Parsing & serializing Last-Modified headers
 # rust-embed only
 rust-embed = { version = "6.4", optional = true }
-base64 = { version = "0.13", optional = true }    # ETag
+base64 = { version = "0.21", optional = true }    # ETag
 # rust-embed-for-web only
 rust-embed-for-web = { version = "11.1", optional = true }
 

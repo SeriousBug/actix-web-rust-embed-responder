@@ -10,15 +10,15 @@ pub(crate) fn parse_accept_encoding_value(value: &HeaderValue) -> Option<Vec<&st
     parse_comma_seperated_list(value, parse_single_encoding_value)
 }
 
-fn parse_comma_seperated_list<'h>(
-    value: &'h HeaderValue,
+fn parse_comma_seperated_list(
+    value: &HeaderValue,
     parse_item: fn(&str) -> Option<&str>,
-) -> Option<Vec<&'h str>> {
+) -> Option<Vec<&str>> {
     value.to_str().ok().map(|v| {
         v.split(',')
             .into_iter()
             .filter_map(parse_item)
-            .collect::<Vec<&'h str>>()
+            .collect::<Vec<&str>>()
     })
 }
 

@@ -107,7 +107,7 @@ pub(crate) fn compress_data_br(hash: &str, data: &[u8]) -> Vec<u8> {
         return data_gzip;
     }
 
-    let mut data_read = BufReader::new(&data[..]);
+    let mut data_read = BufReader::new(data);
     let mut compressed: Vec<u8> = Vec::new();
     brotli::BrotliCompress(
         &mut data_read,
