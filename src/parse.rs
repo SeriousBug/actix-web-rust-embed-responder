@@ -14,12 +14,10 @@ fn parse_comma_seperated_list(
     value: &HeaderValue,
     parse_item: fn(&str) -> Option<&str>,
 ) -> Option<Vec<&str>> {
-    value.to_str().ok().map(|v| {
-        v.split(',')
-            .into_iter()
-            .filter_map(parse_item)
-            .collect::<Vec<&str>>()
-    })
+    value
+        .to_str()
+        .ok()
+        .map(|v| v.split(',').filter_map(parse_item).collect::<Vec<&str>>())
 }
 
 fn parse_single_etag_value(value: &str) -> Option<&str> {

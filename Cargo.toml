@@ -16,21 +16,21 @@ always-embed = ["rust-embed-for-web/always-embed"]
 [dependencies]
 actix-web = "4.3"
 futures-core = "0.3"
-lazy_static = "1.4"  # static caching stuff
-regex = "1.6"        # parsing header valuesg
-flate2 = "1.0"       # gzip compressed responses when doing on-the-fly compression
-brotli = "3.3"       # br compressed responses when doing on-the-fly compression
-chrono = "0.4"       # Parsing & serializing Last-Modified headers
+lazy_static = "1.4"                                                          # static caching stuff
+regex = "1.6"                                                                # parsing header valuesg
+flate2 = "1.0"                                                               # gzip compressed responses when doing on-the-fly compression
+brotli = "3.3"                                                               # br compressed responses when doing on-the-fly compression
+chrono = { version = "0.4", default-features = false, features = ["clock"] }
 # rust-embed only
 rust-embed = { version = "6.4", optional = true }
 base64 = { version = "0.21", optional = true }    # ETag
 # rust-embed-for-web only
-rust-embed-for-web = { version = "11.1", optional = true }
+rust-embed-for-web = { version = "11.1.0", optional = true, git = "https://github.com/zinclabs/rust-embed-for-web.git" }
 
 [dev-dependencies]
 criterion = { version = "0.4", features = ["async_tokio"] }
-tokio = { version = "1.21", features = ["rt"] }
-actix-http = "3.2"
+tokio = { version = "1", features = ["rt"] }
+actix-http = "3.3"
 
 #
 # Example programs
