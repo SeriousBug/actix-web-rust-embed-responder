@@ -16,11 +16,13 @@ always-embed = ["rust-embed-for-web/always-embed"]
 [dependencies]
 actix-web = "4.3"
 futures-core = "0.3"
-lazy_static = "1.4"                                                          # static caching stuff
-regex = "1.6"                                                                # parsing header valuesg
-flate2 = "1.0"                                                               # gzip compressed responses when doing on-the-fly compression
-brotli = "3.3"                                                               # br compressed responses when doing on-the-fly compression
-chrono = { version = "0.4", default-features = false, features = ["clock"] }
+lazy_static = "1.4" # static caching stuff
+regex = "1.6" # parsing header valuesg
+flate2 = "1.0" # gzip compressed responses when doing on-the-fly compression
+brotli = "3.3" # br compressed responses when doing on-the-fly compression
+chrono = { version = "0.4", default-features = false, features = [
+    "clock",
+] } # Parsing & serializing Last-Modified headers
 # rust-embed only
 rust-embed = { version = "6.4", optional = true }
 base64 = { version = "0.21", optional = true }    # ETag
