@@ -56,8 +56,12 @@ impl EmbedRespondable for EmbeddedFile {
     }
 
     fn last_modified(&self) -> Option<Self::LastModified> {
-        self.last_modified_timestamp()
-            .map(|timestamp| chrono::Utc.timestamp(timestamp, 0).to_rfc2822())
+        self.last_modified_timestamp().map(|timestamp| {
+            chrono::Utc
+                .timestamp_opt(timestamp, 0)
+                .unwrap()
+                .to_rfc2822()
+        })
     }
 
     fn last_modified_timestamp(&self) -> Option<i64> {

@@ -10,7 +10,7 @@ mod common;
 use common::{prep_service, ETAG_RE, ETAG_REFW, SECS_PER_BENCH};
 
 lazy_static! {
-    static ref NOW: String = chrono::Local::now().to_rfc2822();
+    static ref NOW: String = chrono::Utc::now().to_rfc2822();
 }
 
 async fn test_re(
