@@ -1,6 +1,12 @@
 # [Rust Embed Responder for Actix Web](https://github.com/SeriousBug/actix-web-rust-embed-responder)
 
-[![Crates.io](https://img.shields.io/crates/v/actix-web-rust-embed-responder)](https://crates.io/crates/actix-web-rust-embed-responder) [![docs.rs](https://img.shields.io/docsrs/actix-web-rust-embed-responder)](https://docs.rs/actix-web-rust-embed-responder/latest/actix_web_rust_embed_responder/) [![tests](https://img.shields.io/github/actions/workflow/status/SeriousBug/actix-web-rust-embed-responder/test.yml?label=tests&branch=main)](https://github.com/SeriousBug/actix-web-rust-embed-responder/actions/workflows/test.yml) [![Test coverage report](https://img.shields.io/codecov/c/github/SeriousBug/actix-web-rust-embed-responder)](https://codecov.io/gh/SeriousBug/actix-web-rust-embed-responder) [![lint checks](https://img.shields.io/github/actions/workflow/status/SeriousBug/actix-web-rust-embed-responder/lint.yml?label=lint&branch=main)](https://github.com/SeriousBug/actix-web-rust-embed-responder/actions/workflows/lint.yml) [![MIT license](https://img.shields.io/github/license/SeriousBug/actix-web-rust-embed-responder)](https://github.com/SeriousBug/actix-web-rust-embed-responder/blob/main/LICENSE.txt)
+[![All Contributors](https://img.shields.io/github/all-contributors/SeriousBug/actix-web-rust-embed-responder)](#contributors)
+[![Crates.io](https://img.shields.io/crates/v/actix-web-rust-embed-responder)](https://crates.io/crates/actix-web-rust-embed-responder)
+[![docs.rs](https://img.shields.io/docsrs/actix-web-rust-embed-responder)](https://docs.rs/actix-web-rust-embed-responder/latest/actix_web_rust_embed_responder/)
+[![tests](https://img.shields.io/github/actions/workflow/status/SeriousBug/actix-web-rust-embed-responder/test.yml?label=tests&branch=main)](https://github.com/SeriousBug/actix-web-rust-embed-responder/actions/workflows/test.yml)
+[![Test coverage report](https://img.shields.io/codecov/c/github/SeriousBug/actix-web-rust-embed-responder)](https://codecov.io/gh/SeriousBug/actix-web-rust-embed-responder)
+[![lint checks](https://img.shields.io/github/actions/workflow/status/SeriousBug/actix-web-rust-embed-responder/lint.yml?label=lint&branch=main)](https://github.com/SeriousBug/actix-web-rust-embed-responder/actions/workflows/lint.yml)
+[![MIT license](https://img.shields.io/github/license/SeriousBug/actix-web-rust-embed-responder)](https://github.com/SeriousBug/actix-web-rust-embed-responder/blob/main/LICENSE.txt)
 
 An Actix Web responder for serving files embedded into the server.
 You can embed files into your server, and then use this responder to serve them out of your server.
@@ -134,3 +140,14 @@ Compared to [actix-plus-static-files](https://crates.io/crates/actix-plus-static
 - This crate uses base85 with `rust-embed-for-web` and base64 with `rust-embed` for the `ETag`, which is more space efficient than the hex encoding used by `actix-plus-static-files`.
 - This crate is only a responder for the `EmbeddedFile` type that you can add to your handlers, while `actix-plus-static-files` implements a service you can directly add into your app.
 - `actix-plus-for-web` implements `If-Any-Match` conditional requests, this crate does not. These are not usually used for `GET` and `HEAD` requests.
+
+## Contributors
+
+<!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
+<!-- prettier-ignore-start -->
+<!-- markdownlint-disable -->
+
+<!-- markdownlint-restore -->
+<!-- prettier-ignore-end -->
+
+<!-- ALL-CONTRIBUTORS-LIST:END -->
