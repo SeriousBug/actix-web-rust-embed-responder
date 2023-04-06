@@ -1,7 +1,4 @@
 # [Rust Embed Responder for Actix Web](https://github.com/SeriousBug/actix-web-rust-embed-responder)
-<!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-[![All Contributors](https://img.shields.io/badge/all_contributors-1-orange.svg?style=flat-square)](#contributors-)
-<!-- ALL-CONTRIBUTORS-BADGE:END -->
 
 [![All Contributors](https://img.shields.io/github/all-contributors/SeriousBug/actix-web-rust-embed-responder)](#contributors)
 [![Crates.io](https://img.shields.io/crates/v/actix-web-rust-embed-responder)](https://crates.io/crates/actix-web-rust-embed-responder)
@@ -156,13 +153,6 @@ Compared to [actix-plus-static-files](https://crates.io/crates/actix-plus-static
     </tr>
   </tbody>
 </table>
-
-<!-- markdownlint-restore -->
-<!-- prettier-ignore-end -->
-
-<!-- ALL-CONTRIBUTORS-LIST:END -->
-<!-- prettier-ignore-start -->
-<!-- markdownlint-disable -->
 
 <!-- markdownlint-restore -->
 <!-- prettier-ignore-end -->
