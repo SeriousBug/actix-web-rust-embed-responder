@@ -4,7 +4,7 @@ version = "2.2.1"
 edition = "2021"
 description = "An actix-web responder for rust-embed that implements cache revalidation and compressed responses."
 license = "MIT"
-readme = "Readme.md"
+readme = "README.md"
 
 [features]
 default = ["support-rust-embed", "support-rust-embed-for-web"]
