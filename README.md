@@ -150,6 +150,7 @@ Compared to [actix-plus-static-files](https://crates.io/crates/actix-plus-static
   <tbody>
     <tr>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/hengfeiyang"><img src="https://avatars.githubusercontent.com/u/1628250?v=4?s=100" width="100px;" alt="Hengfei Yang"/><br /><sub><b>Hengfei Yang</b></sub></a><br /><a href="https://github.com/SeriousBug/actix-web-rust-embed-responder/commits?author=hengfeiyang" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/mpalmer"><img src="https://avatars.githubusercontent.com/u/357?v=4?s=100" width="100px;" alt="Matt Palmer"/><br /><sub><b>Matt Palmer</b></sub></a><br /><a href="https://github.com/SeriousBug/actix-web-rust-embed-responder/commits?author=mpalmer" title="Code">💻</a></td>
     </tr>
   </tbody>
 </table>

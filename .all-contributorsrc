@@ -14,6 +14,15 @@
       "contributions": [
         "code"
       ]
+    },
+    {
+      "login": "mpalmer",
+      "name": "Matt Palmer",
+      "avatar_url": "https://avatars.githubusercontent.com/u/357?v=4",
+      "profile": "https://github.com/mpalmer",
+      "contributions": [
+        "code"
+      ]
     }
   ],
   "contributorsPerLine": 7,
@@ -21,5 +30,6 @@
   "repoType": "github",
   "repoHost": "https://github.com",
   "projectName": "actix-web-rust-embed-responder",
-  "projectOwner": "SeriousBug"
+  "projectOwner": "SeriousBug",
+  "commitType": "docs"
 }
