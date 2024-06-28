@@ -19,7 +19,7 @@ futures-core = "0.3"
 lazy_static = "1.4" # static caching stuff
 regex = "1.9" # parsing header values
 flate2 = "1.0" # gzip compressed responses when doing on-the-fly compression
-brotli = "3.4" # br compressed responses when doing on-the-fly compression
+brotli = "6.0" # br compressed responses when doing on-the-fly compression
 chrono = { version = "0.4", default-features = false, features = [
   "clock",
 ] } # Parsing & serializing Last-Modified headers
