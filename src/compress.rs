@@ -10,6 +10,7 @@ use lazy_static::lazy_static;
 use regex::Regex;
 
 /// When should the server try sending a compressed response?
+#[derive(Default)]
 pub enum Compress {
     /// Never compress responses, even if a precompressed response is available.
     Never,
@@ -21,6 +22,7 @@ pub enum Compress {
     /// This option will only work with `rust-embed-for-web` and only if compression has not been disabled.
     /// With `rust-embed`, or if the `rust-embed-for-web` resource is tagged with `#[gzip = "false"]` this is equivalent to Never.
     ///
+    #[default]
     IfPrecompressed,
     /// Perform on-the-fly compression if the file mime type is well known to be compressible.
     ///
@@ -35,12 +37,6 @@ pub enum Compress {
     /// in which case trying to use compression is just a waste of CPU time.
     ///
     Always,
-}
-
-impl Default for Compress {
-    fn default() -> Self {
-        Self::IfPrecompressed
-    }
 }
 
 /// This is basically a list of text mime types, plus javascript, json, and xml.
