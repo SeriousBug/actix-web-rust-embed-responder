@@ -150,7 +150,7 @@ pub(crate) fn compress_data_zstd(hash: &str, data: &[u8]) -> Vec<u8> {
 #[allow(unused_imports)]
 mod test {
     use crate::compress::is_well_known_compressible_mime_type;
-    use crate::compress_data_gzip;
+    use crate::{compress_data_br, compress_data_gzip};
     use std::io::Write;
     use std::time::Instant;
 
@@ -203,6 +203,15 @@ mod test {
     }
 
     #[test]
+    fn br_roundtrip() {
+        let source = b"x123";
+        let compressed = compress_data_br("bar", source);
+        let mut decompressed = Vec::new();
+        brotli::BrotliDecompress(&mut &compressed[..], &mut decompressed).unwrap();
+        assert_eq!(source, &decompressed[..]);
+    }
+
+    #[test]
     fn compression_is_cached() {
         let source = b"Et quos non sed magnam reiciendis praesentium quod libero. Architecto optio tempora iure aspernatur rerum voluptatem quas. Eos ut atque quas perspiciatis dolorem quidem. Cum et quo et. Voluptatum ut est id eligendi illum inventore. Est non rerum vel rem. Molestiae similique alias nihil harum qui. Consectetur et dolores autem. Magnam et saepe ad reprehenderit. Repellendus vel excepturi eaque esse error. Deserunt est impedit totam nostrum sunt. Eligendi magnam distinctio odit iste molestias est id. Deserunt odit similique magnam repudiandae aut saepe. Dolores laboriosam consectetur quos dolores ea. Non quod veniam quisquam molestias aut deserunt tempora. Mollitia consequuntur facilis doloremque provident eligendi similique possimus. Deleniti facere quam fugiat porro. Tenetur cupiditate eum consequatur beatae dolorum. Veniam voluptatem qui eum quasi corrupti. Quis necessitatibus maxime eum numquam ipsam ducimus expedita maiores. Aliquid voluptas non aut. Tempore dicta ut aperiam ipsum ut et esse explicabo.";
 
@@ -211,6 +220,21 @@ mod test {
         let first = first_start.elapsed();
         let second_start = Instant::now();
         compress_data_gzip("lorem", source);
+        let second = second_start.elapsed();
+
+        // Check that the second call was faster
+        assert!(first > second);
+    }
+
+    #[test]
+    fn br_compression_is_cached() {
+        let source = b"Et quos non sed magnam reiciendis praesentium quod libero. Architecto optio tempora iure aspernatur rerum voluptatem quas. Eos ut atque quas perspiciatis dolorem quidem. Cum et quo et. Voluptatum ut est id eligendi illum inventore. Est non rerum vel rem. Molestiae similique alias nihil harum qui. Consectetur et dolores autem. Magnam et saepe ad reprehenderit. Repellendus vel excepturi eaque esse error. Deserunt est impedit totam nostrum sunt. Eligendi magnam distinctio odit iste molestias est id. Deserunt odit similique magnam repudiandae aut saepe. Dolores laboriosam consectetur quos dolores ea. Non quod veniam quisquam molestias aut deserunt tempora. Mollitia consequuntur facilis doloremque provident eligendi similique possimus. Deleniti facere quam fugiat porro. Tenetur cupiditate eum consequatur beatae dolorum. Veniam voluptatem qui eum quasi corrupti. Quis necessitatibus maxime eum numquam ipsam ducimus expedita maiores. Aliquid voluptas non aut. Tempore dicta ut aperiam ipsum ut et esse explicabo.";
+
+        let first_start = Instant::now();
+        compress_data_br("lorem-br", source);
+        let first = first_start.elapsed();
+        let second_start = Instant::now();
+        compress_data_br("lorem-br", source);
         let second = second_start.elapsed();
 
         // Check that the second call was faster
