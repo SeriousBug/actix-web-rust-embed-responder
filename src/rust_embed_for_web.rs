@@ -96,6 +96,7 @@ where
     type Data = T::Data;
     type DataGzip = T::Data;
     type DataBr = T::Data;
+    type DataZstd = T::Data;
     type ETag = T::Meta;
     type LastModified = T::Meta;
     type MimeType = T::Meta;
@@ -108,8 +109,12 @@ where
         self.0.data_gzip()
     }
 
-    fn data_br(&self) -> Option<Self::DataGzip> {
+    fn data_br(&self) -> Option<Self::DataBr> {
         self.0.data_br()
+    }
+
+    fn data_zstd(&self) -> Option<Self::DataZstd> {
+        self.0.data_zstd()
     }
 
     fn last_modified(&self) -> Option<Self::LastModified> {

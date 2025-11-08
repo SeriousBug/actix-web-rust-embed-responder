@@ -10,6 +10,7 @@ readme = "README.md"
 default = ["support-rust-embed", "support-rust-embed-for-web"]
 support-rust-embed = ["rust-embed", "base64"]
 support-rust-embed-for-web = ["rust-embed-for-web"]
+compression-zstd = ["zstd", "rust-embed-for-web/compression-zstd"]
 # testing only, please ignore!
 always-embed = ["rust-embed-for-web/always-embed"]
 
@@ -20,6 +21,7 @@ lazy_static = "1.4" # static caching stuff
 regex = "1.9" # parsing header values
 flate2 = "1.0" # gzip compressed responses when doing on-the-fly compression
 brotli = "6.0" # br compressed responses when doing on-the-fly compression
+zstd = { version = "0.13", optional = true } # zstd compressed responses when doing on-the-fly compression
 chrono = { version = "0.4", default-features = false, features = [
   "clock",
 ] } # Parsing & serializing Last-Modified headers
@@ -27,7 +29,7 @@ chrono = { version = "0.4", default-features = false, features = [
 rust-embed = { version = "8.0", optional = true }
 base64 = { version = "0.21", optional = true }    # ETag
 # rust-embed-for-web only
-rust-embed-for-web = { version = "11.1.1", optional = true }
+rust-embed-for-web = { version = "11.3.0", optional = true }
 
 [dev-dependencies]
 criterion = { version = "0.5", features = ["async_tokio"] }

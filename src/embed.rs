@@ -4,6 +4,8 @@ use actix_web::{
     HttpRequest, HttpResponse, Responder,
 };
 
+#[cfg(feature = "compression-zstd")]
+use crate::compress_data_zstd;
 use crate::{
     compress::Compress, compress_data_br, compress_data_gzip, helper::accepts_encoding,
     is_well_known_compressible_mime_type, parse::parse_if_none_match_value,
@@ -19,6 +21,7 @@ pub trait EmbedRespondable {
     type Data: MessageBody + 'static + AsRef<[u8]>;
     type DataGzip: MessageBody + 'static + AsRef<[u8]>;
     type DataBr: MessageBody + 'static + AsRef<[u8]>;
+    type DataZstd: MessageBody + 'static + AsRef<[u8]>;
     type MimeType: AsRef<str>;
     type ETag: AsRef<str>;
     type LastModified: AsRef<str>;
@@ -29,10 +32,14 @@ pub trait EmbedRespondable {
     ///
     /// `Some` if precompression has been done, `None` if the file was not precompressed.
     fn data_gzip(&self) -> Option<Self::DataGzip>;
-    /// The contents of the file compressed with gzip.
+    /// The contents of the file compressed with brotli.
     ///
     /// `Some` if precompression has been done, `None` if the file was not precompressed.
     fn data_br(&self) -> Option<Self::DataBr>;
+    /// The contents of the file compressed with zstd.
+    ///
+    /// `Some` if precompression has been done, `None` if the file was not precompressed.
+    fn data_zstd(&self) -> Option<Self::DataZstd>;
     /// The UNIX timestamp of when the file was last modified.
     fn last_modified_timestamp(&self) -> Option<i64>;
     /// The rfc2822 encoded last modified date.
@@ -53,8 +60,9 @@ pub struct EmbedResponse<T: EmbedRespondable> {
 }
 
 enum ShouldCompress {
-    Gzip,
+    Zstd,
     Brotli,
+    Gzip,
     No,
 }
 
@@ -76,7 +84,9 @@ fn should_compress<T: EmbedRespondable>(
                 }
         };
 
-    if should_compress_for_encoding(file.data_br().is_some(), file.mime_type(), "br") {
+    if should_compress_for_encoding(file.data_zstd().is_some(), file.mime_type(), "zstd") {
+        ShouldCompress::Zstd
+    } else if should_compress_for_encoding(file.data_br().is_some(), file.mime_type(), "br") {
         ShouldCompress::Brotli
     } else if should_compress_for_encoding(file.data_gzip().is_some(), file.mime_type(), "gzip") {
         ShouldCompress::Gzip
@@ -116,6 +126,17 @@ fn send_response<T: EmbedRespondable>(
         // version.
         let encoding_choice = should_compress(req, file, &compress);
         match encoding_choice {
+            #[cfg(feature = "compression-zstd")]
+            ShouldCompress::Zstd => {
+                resp.append_header(("Content-Encoding", "zstd"));
+                match file.data_zstd() {
+                    Some(data_zstd) => resp.body(data_zstd),
+                    None => resp.body(compress_data_zstd(
+                        file.etag().as_ref(),
+                        file.data().as_ref(),
+                    )),
+                }
+            }
             ShouldCompress::Brotli => {
                 resp.append_header(("Content-Encoding", "br"));
                 match file.data_br() {
@@ -132,6 +153,11 @@ fn send_response<T: EmbedRespondable>(
                         file.data().as_ref(),
                     )),
                 }
+            }
+            #[cfg(not(feature = "compression-zstd"))]
+            ShouldCompress::Zstd => {
+                // This should never happen, but if it does, just serve uncompressed
+                resp.body(file.data())
             }
             ShouldCompress::No => resp.body(file.data()),
         }

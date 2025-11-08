@@ -10,6 +10,7 @@ use lazy_static::lazy_static;
 use regex::Regex;
 
 /// When should the server try sending a compressed response?
+#[derive(Default)]
 pub enum Compress {
     /// Never compress responses, even if a precompressed response is available.
     Never,
@@ -21,6 +22,7 @@ pub enum Compress {
     /// This option will only work with `rust-embed-for-web` and only if compression has not been disabled.
     /// With `rust-embed`, or if the `rust-embed-for-web` resource is tagged with `#[gzip = "false"]` this is equivalent to Never.
     ///
+    #[default]
     IfPrecompressed,
     /// Perform on-the-fly compression if the file mime type is well known to be compressible.
     ///
@@ -35,12 +37,6 @@ pub enum Compress {
     /// in which case trying to use compression is just a waste of CPU time.
     ///
     Always,
-}
-
-impl Default for Compress {
-    fn default() -> Self {
-        Self::IfPrecompressed
-    }
 }
 
 /// This is basically a list of text mime types, plus javascript, json, and xml.
@@ -121,10 +117,40 @@ pub(crate) fn compress_data_br(hash: &str, data: &[u8]) -> Vec<u8> {
     compressed
 }
 
+// Putting the data into cache could potentially fail. That's okay if it does
+// happen, we have no way of handling that and we might as well just keep
+// serving files.
+#[allow(unused_must_use)]
+/// Compresses data with zstd encoding.
+///
+/// The compressed files are cached based on the hash values provided.
+/// Since we already have the hashes precomputed in rust-embed and rust-embed-for-web,
+/// we just reuse that instead of trying to hash the data this function gets.
+#[cfg(feature = "compression-zstd")]
+pub(crate) fn compress_data_zstd(hash: &str, data: &[u8]) -> Vec<u8> {
+    lazy_static! {
+        static ref CACHED_ZSTD_DATA: RwLock<HashMap<String, Vec<u8>>> = RwLock::new(HashMap::new());
+    }
+
+    if let Some(data_zstd) = CACHED_ZSTD_DATA
+        .read()
+        .ok()
+        .and_then(|cached| cached.get(hash).map(ToOwned::to_owned))
+    {
+        return data_zstd;
+    }
+
+    let compressed = zstd::encode_all(data, 0).expect("Failed to compress zstd data");
+    CACHED_ZSTD_DATA
+        .write()
+        .map(|mut cached| cached.insert(hash.to_string(), compressed.clone()));
+    compressed
+}
+
 #[allow(unused_imports)]
 mod test {
     use crate::compress::is_well_known_compressible_mime_type;
-    use crate::compress_data_gzip;
+    use crate::{compress_data_br, compress_data_gzip};
     use std::io::Write;
     use std::time::Instant;
 
@@ -140,39 +166,29 @@ mod test {
 
     #[test]
     fn javascript_file_is_compressible() {
-        assert_eq!(
-            is_well_known_compressible_mime_type("application/javascript"),
-            true
-        )
+        assert!(is_well_known_compressible_mime_type(
+            "application/javascript"
+        ))
     }
 
     #[test]
     fn json_file_is_compressible() {
-        assert_eq!(
-            is_well_known_compressible_mime_type("application/json"),
-            true
-        )
+        assert!(is_well_known_compressible_mime_type("application/json"))
     }
 
     #[test]
     fn xml_file_is_compressible() {
-        assert_eq!(
-            is_well_known_compressible_mime_type("application/xml"),
-            true
-        )
+        assert!(is_well_known_compressible_mime_type("application/xml"))
     }
 
     #[test]
     fn jpg_file_not_compressible() {
-        assert_eq!(is_well_known_compressible_mime_type("image/jpeg"), false)
+        assert!(!is_well_known_compressible_mime_type("image/jpeg"))
     }
 
     #[test]
     fn zip_file_not_compressible() {
-        assert_eq!(
-            is_well_known_compressible_mime_type("application/zip"),
-            false
-        )
+        assert!(!is_well_known_compressible_mime_type("application/zip"))
     }
 
     #[test]
@@ -187,6 +203,15 @@ mod test {
     }
 
     #[test]
+    fn br_roundtrip() {
+        let source = b"x123";
+        let compressed = compress_data_br("bar", source);
+        let mut decompressed = Vec::new();
+        brotli::BrotliDecompress(&mut &compressed[..], &mut decompressed).unwrap();
+        assert_eq!(source, &decompressed[..]);
+    }
+
+    #[test]
     fn compression_is_cached() {
         let source = b"Et quos non sed magnam reiciendis praesentium quod libero. Architecto optio tempora iure aspernatur rerum voluptatem quas. Eos ut atque quas perspiciatis dolorem quidem. Cum et quo et. Voluptatum ut est id eligendi illum inventore. Est non rerum vel rem. Molestiae similique alias nihil harum qui. Consectetur et dolores autem. Magnam et saepe ad reprehenderit. Repellendus vel excepturi eaque esse error. Deserunt est impedit totam nostrum sunt. Eligendi magnam distinctio odit iste molestias est id. Deserunt odit similique magnam repudiandae aut saepe. Dolores laboriosam consectetur quos dolores ea. Non quod veniam quisquam molestias aut deserunt tempora. Mollitia consequuntur facilis doloremque provident eligendi similique possimus. Deleniti facere quam fugiat porro. Tenetur cupiditate eum consequatur beatae dolorum. Veniam voluptatem qui eum quasi corrupti. Quis necessitatibus maxime eum numquam ipsam ducimus expedita maiores. Aliquid voluptas non aut. Tempore dicta ut aperiam ipsum ut et esse explicabo.";
 
@@ -195,6 +220,46 @@ mod test {
         let first = first_start.elapsed();
         let second_start = Instant::now();
         compress_data_gzip("lorem", source);
+        let second = second_start.elapsed();
+
+        // Check that the second call was faster
+        assert!(first > second);
+    }
+
+    #[test]
+    fn br_compression_is_cached() {
+        let source = b"Et quos non sed magnam reiciendis praesentium quod libero. Architecto optio tempora iure aspernatur rerum voluptatem quas. Eos ut atque quas perspiciatis dolorem quidem. Cum et quo et. Voluptatum ut est id eligendi illum inventore. Est non rerum vel rem. Molestiae similique alias nihil harum qui. Consectetur et dolores autem. Magnam et saepe ad reprehenderit. Repellendus vel excepturi eaque esse error. Deserunt est impedit totam nostrum sunt. Eligendi magnam distinctio odit iste molestias est id. Deserunt odit similique magnam repudiandae aut saepe. Dolores laboriosam consectetur quos dolores ea. Non quod veniam quisquam molestias aut deserunt tempora. Mollitia consequuntur facilis doloremque provident eligendi similique possimus. Deleniti facere quam fugiat porro. Tenetur cupiditate eum consequatur beatae dolorum. Veniam voluptatem qui eum quasi corrupti. Quis necessitatibus maxime eum numquam ipsam ducimus expedita maiores. Aliquid voluptas non aut. Tempore dicta ut aperiam ipsum ut et esse explicabo.";
+
+        let first_start = Instant::now();
+        compress_data_br("lorem-br", source);
+        let first = first_start.elapsed();
+        let second_start = Instant::now();
+        compress_data_br("lorem-br", source);
+        let second = second_start.elapsed();
+
+        // Check that the second call was faster
+        assert!(first > second);
+    }
+
+    #[test]
+    #[cfg(feature = "compression-zstd")]
+    fn zstd_roundtrip() {
+        let source = b"x123";
+        let compressed = crate::compress_data_zstd("foo", source);
+        let decompressed = zstd::decode_all(&compressed[..]).unwrap();
+        assert_eq!(source, &decompressed[..]);
+    }
+
+    #[test]
+    #[cfg(feature = "compression-zstd")]
+    fn zstd_compression_is_cached() {
+        let source = b"Et quos non sed magnam reiciendis praesentium quod libero. Architecto optio tempora iure aspernatur rerum voluptatem quas. Eos ut atque quas perspiciatis dolorem quidem. Cum et quo et. Voluptatum ut est id eligendi illum inventore. Est non rerum vel rem. Molestiae similique alias nihil harum qui. Consectetur et dolores autem. Magnam et saepe ad reprehenderit. Repellendus vel excepturi eaque esse error. Deserunt est impedit totam nostrum sunt. Eligendi magnam distinctio odit iste molestias est id. Deserunt odit similique magnam repudiandae aut saepe. Dolores laboriosam consectetur quos dolores ea. Non quod veniam quisquam molestias aut deserunt tempora. Mollitia consequuntur facilis doloremque provident eligendi similique possimus. Deleniti facere quam fugiat porro. Tenetur cupiditate eum consequatur beatae dolorum. Veniam voluptatem qui eum quasi corrupti. Quis necessitatibus maxime eum numquam ipsam ducimus expedita maiores. Aliquid voluptas non aut. Tempore dicta ut aperiam ipsum ut et esse explicabo.";
+
+        let first_start = Instant::now();
+        crate::compress_data_zstd("lorem-zstd", source);
+        let first = first_start.elapsed();
+        let second_start = Instant::now();
+        crate::compress_data_zstd("lorem-zstd", source);
         let second = second_start.elapsed();
 
         // Check that the second call was faster

@@ -7,8 +7,6 @@ mod embed;
 
 #[cfg(feature = "support-rust-embed")]
 mod rust_embed;
-#[cfg(feature = "support-rust-embed")]
-pub use crate::rust_embed::*;
 
 #[cfg(feature = "support-rust-embed-for-web")]
 mod rust_embed_for_web;
