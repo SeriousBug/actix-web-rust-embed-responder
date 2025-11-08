@@ -39,6 +39,7 @@ impl EmbedRespondable for EmbeddedFile {
     type Data = Cow<'static, [u8]>;
     type DataGzip = Vec<u8>;
     type DataBr = Vec<u8>;
+    type DataZstd = Vec<u8>;
     type ETag = String;
     type LastModified = String;
     type MimeType = String;
@@ -51,7 +52,11 @@ impl EmbedRespondable for EmbeddedFile {
         None
     }
 
-    fn data_br(&self) -> Option<Self::DataGzip> {
+    fn data_br(&self) -> Option<Self::DataBr> {
+        None
+    }
+
+    fn data_zstd(&self) -> Option<Self::DataZstd> {
         None
     }
 
