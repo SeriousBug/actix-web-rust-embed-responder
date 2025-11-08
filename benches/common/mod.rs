@@ -44,9 +44,9 @@ pub fn prep_service(
 
 // These aren't actually dead, but it looks like rust can't tell that.
 #[allow(dead_code)]
-pub static ETAG_RE: &'static str = r#""0HmEESpoRuXjI9o47wPpRmueMqePF3leJjWufwSYkNs""#;
+pub static ETAG_RE: &str = r#""0HmEESpoRuXjI9o47wPpRmueMqePF3leJjWufwSYkNs""#;
 #[allow(dead_code)]
-pub static ETAG_REFW: &'static str = r#""(0POrDriRK<0INQ?*r*ZYo0Qvj~97fCN-{q1elQ9""#;
+pub static ETAG_REFW: &str = r#""(0POrDriRK<0INQ?*r*ZYo0Qvj~97fCN-{q1elQ9""#;
 #[allow(dead_code)]
 /// The number of seconds to run each benchmark for.
 pub static SECS_PER_BENCH: u64 = 60;

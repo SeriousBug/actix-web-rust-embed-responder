@@ -166,39 +166,29 @@ mod test {
 
     #[test]
     fn javascript_file_is_compressible() {
-        assert_eq!(
-            is_well_known_compressible_mime_type("application/javascript"),
-            true
-        )
+        assert!(is_well_known_compressible_mime_type(
+            "application/javascript"
+        ))
     }
 
     #[test]
     fn json_file_is_compressible() {
-        assert_eq!(
-            is_well_known_compressible_mime_type("application/json"),
-            true
-        )
+        assert!(is_well_known_compressible_mime_type("application/json"))
     }
 
     #[test]
     fn xml_file_is_compressible() {
-        assert_eq!(
-            is_well_known_compressible_mime_type("application/xml"),
-            true
-        )
+        assert!(is_well_known_compressible_mime_type("application/xml"))
     }
 
     #[test]
     fn jpg_file_not_compressible() {
-        assert_eq!(is_well_known_compressible_mime_type("image/jpeg"), false)
+        assert!(!is_well_known_compressible_mime_type("image/jpeg"))
     }
 
     #[test]
     fn zip_file_not_compressible() {
-        assert_eq!(
-            is_well_known_compressible_mime_type("application/zip"),
-            false
-        )
+        assert!(!is_well_known_compressible_mime_type("application/zip"))
     }
 
     #[test]
