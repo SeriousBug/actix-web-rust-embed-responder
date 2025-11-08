@@ -4,12 +4,12 @@ use actix_web::{
     HttpRequest, HttpResponse, Responder,
 };
 
+#[cfg(feature = "compression-zstd")]
+use crate::compress_data_zstd;
 use crate::{
     compress::Compress, compress_data_br, compress_data_gzip, helper::accepts_encoding,
     is_well_known_compressible_mime_type, parse::parse_if_none_match_value,
 };
-#[cfg(feature = "compression-zstd")]
-use crate::compress_data_zstd;
 
 /// A common trait used internally to create HTTP responses.
 ///
