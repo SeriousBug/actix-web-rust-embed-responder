@@ -15,7 +15,7 @@ compression-zstd = ["zstd", "rust-embed-for-web/compression-zstd"]
 always-embed = ["rust-embed-for-web/always-embed"]
 
 [dependencies]
-actix-web = "4.4"
+actix-web = "4.13"
 futures-core = "0.3"
 lazy_static = "1.4" # static caching stuff
 regex = "1.9" # parsing header values
@@ -34,7 +34,7 @@ rust-embed-for-web = { version = "11.3.0", optional = true }
 [dev-dependencies]
 criterion = { version = "0.7", features = ["async_tokio"] }
 tokio = { version = "1", features = ["rt"] }
-actix-http = "3.4"
+actix-http = "3.12"
 
 #
 # Example programs
